@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC Radar — Veille commerciale IA · Mission Conseil Group</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#F3F4FA;
+  --bg-side-1:#1A1E3B;
+  --bg-side-2:#12142A;
+  --surface:#FFFFFF;
+  --surface-alt:#F7F8FC;
+  --surface-2:#EEF0F9;
+  --border:#E4E6F1;
+  --border-soft:#ECEEF7;
+  --text:#181B2E;
+  --text-dim:#656B82;
+  --text-faint:#98A0B5;
+  --side-text:#B7BBDD;
+  --side-text-dim:#7C81A8;
+  --primary:#5B5FEF;
+  --primary-dark:#4649C4;
+  --primary-soft:#EEEEFE;
+  --teal:#0EA8A0;
+  --teal-soft:#E4FAF7;
+  --pA:#EF4553;
+  --pA-soft:#FDECEE;
+  --pB:#F0940D;
+  --pB-soft:#FFF3E0;
+  --pC:#3B82F6;
+  --pC-soft:#EAF2FE;
+  --pR:#8992AB;
+  --pR-soft:#F1F2F8;
+  --success:#0FAF77;
+  --success-soft:#E4FAF1;
+  --font-d:'Space Grotesk',sans-serif;
+  --font-b:'Inter',sans-serif;
+  --font-m:'JetBrains Mono',monospace;
+  --r-sm:8px;--r-md:12px;--r-lg:18px;
+  --shadow-sm:0 1px 2px rgba(20,22,50,.05);
+  --shadow-md:0 6px 20px rgba(30,32,70,.08);
+  --shadow-lg:0 20px 50px rgba(20,22,50,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+::selection{background:var(--primary-soft);color:var(--primary-dark);}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.mono{font-family:var(--font-m);}
+.hidden{display:none !important;}
+
+/* ================= APP SHELL ================= */
+.app{display:grid;grid-template-columns:264px 1fr;min-height:100vh;}
+
+/* ---- Sidebar ---- */
+.sidebar{
+  background:linear-gradient(190deg, var(--bg-side-1), var(--bg-side-2) 75%);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:40;
+}
+.brand{display:flex;align-items:center;gap:11px;padding:22px 20px 18px;}
+.brand-mark{
+  width:34px;height:34px;border-radius:10px;flex:none;position:relative;
+  background:linear-gradient(135deg,var(--primary),var(--teal));
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(91,95,239,.35);
+}
+.brand-mark svg{width:18px;height:18px;color:#fff;}
+.brand-text{line-height:1.15;}
+.brand-text b{font-family:var(--font-d);font-size:15px;color:#fff;letter-spacing:.01em;}
+.brand-text span{font-size:10.8px;color:var(--side-text-dim);}
+
+.nav{padding:6px 12px 14px;flex:1;}
+.nav-label{font-size:10.2px;text-transform:uppercase;letter-spacing:.09em;color:var(--side-text-dim);padding:16px 12px 7px;font-weight:600;}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:var(--r-sm);
+  color:var(--side-text);font-size:13.2px;font-weight:500;position:relative;
+}
+.nav-item svg{width:16px;height:16px;flex:none;opacity:.8;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#fff;}
+.nav-item.active{background:rgba(255,255,255,.08);color:#fff;}
+.nav-item.active::before{
+  content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;
+  background:linear-gradient(180deg,var(--primary),var(--teal));
+}
+.nav-item.active svg{opacity:1;color:var(--teal);}
+.nav-badge{margin-left:auto;background:var(--pA);color:#fff;font-family:var(--font-m);font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;}
+.subnav{padding:2px 0 6px 41px;display:flex;flex-direction:column;gap:1px;}
+.subnav a{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6.5px 10px;
+  font-size:12.3px;color:var(--side-text-dim);border-radius:6px;
+}
+.subnav a:hover{color:#fff;background:rgba(255,255,255,.04);}
+.subnav a.active{color:var(--teal);font-weight:600;}
+.subnav a .c{font-family:var(--font-m);font-size:10.5px;color:var(--side-text-dim);}
+.sidebar-foot{padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.avatar{width:32px;height:32px;border-radius:9px;flex:none;background:linear-gradient(135deg,var(--teal),var(--primary));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:700;font-size:12px;color:#fff;}
+.sidebar-foot .who b{font-size:12.4px;display:block;color:#fff;}
+.sidebar-foot .who span{font-size:10.8px;color:var(--side-text-dim);}
+
+/* ---- Main ---- */
+.main{display:flex;flex-direction:column;min-width:0;}
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:14px 28px;border-bottom:1px solid var(--border-soft);background:rgba(243,244,250,.88);backdrop-filter:blur(10px);
+}
+.hamburger{display:none;}
+.search-box{flex:1;max-width:400px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:8px 12px;box-shadow:var(--shadow-sm);}
+.search-box svg{width:15px;height:15px;color:var(--text-faint);flex:none;}
+.search-box input{background:transparent;border:none;outline:none;color:var(--text);width:100%;font-size:13px;}
+.search-box input::placeholder{color:var(--text-faint);}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.icon-btn{width:37px;height:37px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--text-dim);position:relative;flex:none;box-shadow:var(--shadow-sm);}
+.icon-btn:hover{color:var(--primary);border-color:var(--primary);}
+.icon-btn svg{width:16px;height:16px;}
+.dot-alert{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--pA);box-shadow:0 0 0 2px var(--surface);}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:var(--r-sm);font-size:12.8px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text);white-space:nowrap;box-shadow:var(--shadow-sm);}
+.btn:hover{border-color:var(--primary);color:var(--primary);}
+.btn svg{width:14px;height:14px;}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#7275F5);border-color:transparent;color:#fff;}
+.btn-primary:hover{filter:brightness(1.06);color:#fff;}
+.btn-ghost{background:transparent;border-color:transparent;box-shadow:none;}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text);}
+.btn-danger{color:var(--pA);}
+.btn-danger:hover{border-color:var(--pA);}
+.btn-sm{padding:6px 11px;font-size:11.8px;}
+
+.content{padding:28px;flex:1;min-width:0;}
+.view{display:none;}
+.view.active{display:block;animation:fade .22s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-faint);margin-bottom:10px;}
+.breadcrumb a{color:var(--primary);font-weight:600;}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px;flex-wrap:wrap;}
+.page-head h1{font-family:var(--font-d);font-size:23px;font-weight:600;letter-spacing:-.01em;}
+.page-head p{color:var(--text-dim);font-size:13px;margin-top:4px;max-width:580px;}
+.page-head .actions{display:flex;gap:8px;}
+
+/* ---------- KPI ---------- */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:17px 19px;box-shadow:var(--shadow-sm);position:relative;}
+.kpi-card .top-row{display:flex;justify-content:space-between;align-items:flex-start;}
+.kpi-card .ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.kpi-card .ico svg{width:16px;height:16px;}
+.kpi-card .label{font-size:11.3px;color:var(--text-faint);margin-top:12px;}
+.kpi-card .value{font-family:var(--font-d);font-size:27px;font-weight:600;margin-top:3px;}
+.kpi-card .delta{font-size:11.3px;margin-top:5px;color:var(--text-dim);}
+.kpi-card .delta.up{color:var(--success);font-weight:600;}
+.kpi-card .delta.warn{color:var(--pA);font-weight:600;}
+
+/* ---------- radar ---------- */
+.radar-wrap{display:grid;grid-template-columns:340px 1fr;gap:0;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);margin-bottom:20px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.radar-scope{position:relative;display:flex;align-items:center;justify-content:center;padding:26px;border-right:1px solid var(--border-soft);background:radial-gradient(circle at center, var(--primary-soft), transparent 72%);}
+.radar-svg{width:100%;height:auto;overflow:visible;}
+.radar-ring{fill:none;stroke:var(--border);stroke-width:1;}
+.radar-axis{stroke:var(--border-soft);stroke-width:1;}
+.radar-sweep-group{transform-origin:150px 150px;animation:sweep 7s linear infinite;}
+.radar-sweep{fill:url(#sweepGrad);}
+@keyframes sweep{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.blip{cursor:pointer;}
+.blip circle.core{filter:drop-shadow(0 0 4px currentColor);}
+.blip-pulse{animation:pulse 2.4s ease-out infinite;transform-origin:center;}
+@keyframes pulse{0%{opacity:.5;r:4;}100%{opacity:0;r:15;}}
+.radar-caption{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:10.3px;color:var(--text-faint);letter-spacing:.04em;}
+.radar-side{padding:20px 22px;display:flex;flex-direction:column;gap:14px;}
+.radar-side h3{font-family:var(--font-d);font-size:15px;font-weight:600;}
+.radar-side p.sub{font-size:12px;color:var(--text-dim);}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:4px;}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11.6px;color:var(--text-dim);}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex:none;}
+.sector-bars{display:flex;flex-direction:column;gap:9px;margin-top:6px;}
+.sector-bar-row{display:grid;grid-template-columns:108px 1fr 28px;align-items:center;gap:10px;font-size:11.6px;}
+.sector-bar-row .name{color:var(--text-dim);}
+.sector-bar-track{height:6px;background:var(--surface-2);border-radius:4px;overflow:hidden;}
+.sector-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--teal));border-radius:4px;}
+.sector-bar-row .num{text-align:right;font-family:var(--font-m);color:var(--text-faint);}
+
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;}
+.section-title h2{font-family:var(--font-d);font-size:15.5px;font-weight:600;}
+.section-title a{font-size:12px;color:var(--primary);font-weight:600;}
+
+/* ---------- table ---------- */
+.table-wrap{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);}
+.table-toolbar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border-soft);flex-wrap:wrap;}
+.mini-search{display:flex;align-items:center;gap:7px;background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 10px;flex:1;max-width:260px;}
+.mini-search svg{width:13px;height:13px;color:var(--text-faint);}
+.mini-search input{border:none;background:transparent;outline:none;font-size:12.3px;width:100%;}
+table{width:100%;border-collapse:collapse;font-size:12.7px;}
+thead th{text-align:left;padding:11px 16px;color:var(--text-faint);font-weight:600;font-size:10.6px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border-soft);white-space:nowrap;cursor:pointer;user-select:none;}
+thead th:hover{color:var(--primary);}
+thead th .arrow{font-size:9px;margin-left:3px;opacity:.6;}
+thead th.no-sort{cursor:default;}
+thead th.no-sort:hover{color:var(--text-faint);}
+tbody tr{border-bottom:1px solid var(--border-soft);transition:background .1s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface-alt);}
+tbody td{padding:12px 16px;vertical-align:middle;}
+.opp-title-cell{display:flex;flex-direction:column;gap:2px;max-width:280px;}
+.opp-title-cell b{font-size:13px;font-weight:600;}
+.opp-title-cell span{font-size:11.2px;color:var(--text-faint);}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.badge-A{background:var(--pA-soft);color:var(--pA);}
+.badge-B{background:var(--pB-soft);color:var(--pB);}
+.badge-C{background:var(--pC-soft);color:var(--pC);}
+.badge-R{background:var(--pR-soft);color:var(--pR);}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.score-cell{display:flex;align-items:center;gap:8px;}
+.score-cell b{font-family:var(--font-m);font-size:13px;}
+.mini-track{width:44px;height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden;}
+.mini-fill{height:100%;border-radius:3px;}
+.status-pill{font-size:11.2px;padding:3px 10px;border-radius:20px;background:var(--surface-2);color:var(--text-dim);border:1px solid var(--border);white-space:nowrap;}
+.chev-btn{color:var(--text-faint);}
+.empty-row td{padding:44px 20px;text-align:center;color:var(--text-faint);}
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-top:1px solid var(--border-soft);font-size:12px;color:var(--text-faint);}
+.pg-btns{display:flex;gap:6px;}
+.pg-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:11.5px;font-family:var(--font-m);}
+.pg-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary);}
+.pg-btn:disabled{opacity:.4;cursor:default;}
+.pg-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+/* ---------- opportunities filters ---------- */
+.opp-layout{display:grid;grid-template-columns:250px 1fr;gap:18px;align-items:start;}
+.filters-panel{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:18px;position:sticky;top:82px;box-shadow:var(--shadow-sm);}
+.filters-panel h3{font-family:var(--font-d);font-size:13.3px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+.filters-panel h3 button{font-size:11px;color:var(--primary);font-weight:600;background:none;border:none;}
+.filter-group{margin-bottom:16px;}
+.filter-group label{display:block;font-size:10.8px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;}
+.filter-group select, .filter-group input[type=text]{width:100%;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:var(--r-sm);font-size:12.4px;outline:none;}
+.chip-group{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--surface-alt);font-size:11.4px;color:var(--text-dim);}
+.chip.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-dark);}
+.range-row{display:flex;align-items:center;gap:8px;}
+.range-row input[type=range]{flex:1;accent-color:var(--primary);}
+.range-val{font-family:var(--font-m);font-size:11.4px;color:var(--text-dim);width:28px;text-align:right;}
+
+/* ---------- opportunity detail (page dédiée) ---------- */
+.detail-topbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.back-btn{display:flex;align-items:center;gap:7px;font-size:12.6px;font-weight:600;color:var(--text-dim);}
+.back-btn:hover{color:var(--primary);}
+.back-btn svg{width:15px;height:15px;}
+.detail-hero{
+  background:linear-gradient(120deg, var(--primary-soft), var(--teal-soft));
+  border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:26px 28px;margin-bottom:20px;box-shadow:var(--shadow-sm);
+}
+.detail-hero .id{font-family:var(--font-m);font-size:11px;color:var(--text-dim);}
+.detail-hero h1{font-family:var(--font-d);font-size:22px;font-weight:600;margin:8px 0 12px;line-height:1.32;max-width:760px;}
+.detail-hero .meta{display:flex;flex-wrap:wrap;gap:8px;}
+.detail-actions{display:flex;gap:9px;margin-left:auto;}
+.detail-hero-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+.detail-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start;}
+.d-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.d-card h4{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+.d-card h4 svg{width:14px;height:14px;color:var(--primary);}
+.stat-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.stat-tile{border-radius:var(--r-md);padding:13px 14px;}
+.stat-tile span{display:block;font-size:10.5px;color:var(--text-faint);margin-bottom:4px;}
+.stat-tile b{font-size:13px;}
+.tile-violet{background:var(--primary-soft);}
+.tile-teal{background:var(--teal-soft);}
+.tile-amber{background:var(--pB-soft);}
+.fiche-summary{font-size:13.2px;color:var(--text);line-height:1.65;}
+.score-breakdown{display:flex;flex-direction:column;gap:10px;}
+.sb-row{display:grid;grid-template-columns:130px 1fr 32px;gap:10px;align-items:center;font-size:11.8px;}
+.sb-row .name{color:var(--text-dim);}
+.sb-track{height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden;}
+.sb-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--primary),var(--teal));}
+.sb-row .num{font-family:var(--font-m);text-align:right;color:var(--text-faint);}
+.score-total{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);}
+.score-total b{font-family:var(--font-d);font-size:24px;}
+
+/* provenance */
+.prov-card{background:linear-gradient(120deg, var(--teal-soft), var(--surface));border:1px solid var(--border-soft);}
+.prov-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);}
+.prov-row:last-child{border-bottom:none;}
+.prov-ico{width:34px;height:34px;border-radius:9px;background:var(--teal-soft);display:flex;align-items:center;justify-content:center;flex:none;}
+.prov-ico svg{width:16px;height:16px;color:var(--teal);}
+.prov-row .k{font-size:10.6px;color:var(--text-faint);margin-bottom:2px;}
+.prov-row .v{font-size:12.6px;font-weight:500;}
+.prov-row .v a{color:var(--primary);font-weight:600;}
+.extract-box{margin-top:12px;background:var(--surface-alt);border-left:3px solid var(--teal);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:12px 14px;font-size:12.4px;color:var(--text-dim);font-style:italic;}
+.confidence-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.3px;font-weight:600;padding:4px 10px;border-radius:20px;margin-top:12px;}
+.conf-Élevé{background:var(--success-soft);color:var(--success);}
+.conf-Moyen{background:var(--pB-soft);color:var(--pB);}
+.conf-Faible{background:var(--pA-soft);color:var(--pA);}
+
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px 18px;}
+.info-item span{display:block;font-size:10.6px;color:var(--text-faint);margin-bottom:3px;}
+.info-item b{font-size:12.7px;font-weight:500;}
+.reco-box{display:flex;align-items:center;gap:10px;background:var(--primary-soft);border:1px solid rgba(91,95,239,.22);border-radius:var(--r-md);padding:13px 16px;font-size:12.6px;color:var(--primary-dark);font-weight:600;margin-bottom:18px;}
+.reco-box svg{width:18px;height:18px;flex:none;}
+.action-select-row{display:flex;gap:10px;flex-wrap:wrap;}
+.action-select-row select{flex:1;min-width:150px;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:var(--r-sm);font-size:12.4px;}
+.timeline{display:flex;flex-direction:column;gap:11px;}
+.timeline-item{display:flex;gap:10px;font-size:12px;}
+.timeline-dot{width:7px;height:7px;border-radius:50%;background:var(--border);margin-top:5px;flex:none;}
+.timeline-item.last .timeline-dot{background:var(--teal);}
+.timeline-item .txt b{display:block;font-weight:500;color:var(--text);}
+.timeline-item .txt span{color:var(--text-faint);font-size:11px;}
+.comment-list{display:flex;flex-direction:column;gap:11px;margin-bottom:12px;}
+.comment-item{display:flex;gap:10px;}
+.c-avatar{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--teal));display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff;flex:none;}
+.comment-bubble{background:var(--surface-alt);border-radius:var(--r-md);padding:9px 12px;font-size:12.3px;flex:1;}
+.comment-bubble .who{font-weight:600;font-size:11.4px;color:var(--text-dim);margin-bottom:3px;}
+.comment-form{display:flex;gap:8px;}
+.comment-form textarea{flex:1;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);border-radius:var(--r-sm);padding:9px 11px;font-size:12.4px;resize:none;height:42px;outline:none;}
+
+/* ---------- reports ---------- */
+.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--border-soft);padding:4px;border-radius:var(--r-md);width:fit-content;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.tab{padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text-dim);border:none;background:transparent;}
+.tab.active{background:var(--primary);color:#fff;}
+.report-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:28px 30px;box-shadow:var(--shadow-sm);}
+.report-cols{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:start;}
+.config-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start;}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+#sourceList.cards-grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));}
+@media (max-width:1100px){.report-cols,.config-grid{grid-template-columns:1fr;}}
+.report-card-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--border-soft);padding-bottom:16px;margin-bottom:18px;}
+.report-card-head h2{font-family:var(--font-d);font-size:19px;}
+.report-card-head p{font-size:12px;color:var(--text-faint);margin-top:4px;}
+.report-section{margin-bottom:20px;}
+.report-section h4{font-size:11.3px;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);margin-bottom:10px;}
+.report-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:12.7px;}
+.report-item:last-child{border-bottom:none;}
+.report-item .n{font-family:var(--font-m);color:var(--text-faint);width:20px;flex:none;}
+.report-item .txt b{display:block;}
+.report-item .txt span{color:var(--text-faint);font-size:11.4px;}
+.report-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.report-stat{background:var(--surface-alt);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:12px;text-align:center;}
+.report-stat b{display:block;font-family:var(--font-d);font-size:19px;}
+.report-stat span{font-size:9.8px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;}
+.reco-line{display:flex;align-items:center;gap:9px;font-size:12.5px;padding:9px 0;color:var(--text-dim);}
+.reco-line svg{width:14px;height:14px;color:var(--teal);flex:none;}
+
+/* ---------- config pages (scoring / secteurs / villes / diffusion / users / sources) ---------- */
+.panel-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel-card h3{font-family:var(--font-d);font-size:15px;margin-bottom:4px;}
+.panel-card p.hint{font-size:12px;color:var(--text-faint);margin-bottom:18px;}
+.weight-row{display:grid;grid-template-columns:170px 1fr 60px;align-items:center;gap:12px;margin-bottom:15px;}
+.weight-row .lbl{font-size:12.5px;}
+.weight-row .lbl small{display:block;color:var(--text-faint);font-size:10.6px;font-weight:400;}
+.weight-row input[type=range]{width:100%;accent-color:var(--primary);}
+.weight-row .val{font-family:var(--font-m);text-align:right;font-size:13px;}
+.weight-total{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px dashed var(--border);font-size:12.7px;}
+.weight-total b{font-family:var(--font-m);font-size:16px;}
+.weight-total b.ok{color:var(--success);}
+.weight-total b.bad{color:var(--pA);}
+.thresh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.thresh-item{border-radius:var(--r-sm);padding:10px 11px;}
+.thresh-item span{display:block;font-size:10.4px;margin-bottom:5px;font-weight:600;}
+.thresh-item input{background:transparent;border:none;font-family:var(--font-m);font-size:15px;width:100%;outline:none;color:inherit;}
+
+.sector-row,.city-row{display:flex;align-items:center;gap:10px;padding:12px 13px;background:var(--surface-alt);border:1px solid var(--border-soft);border-radius:var(--r-sm);}
+#sectorRows,#cityRows{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:6px;}
+.sector-row .nm,.city-row .nm{font-weight:600;font-size:12.8px;flex:1;}
+.sector-row select{background:var(--surface);border:1px solid var(--border);padding:6px 10px;border-radius:var(--r-sm);font-size:12px;}
+.rank-badge{width:24px;height:24px;border-radius:7px;background:var(--primary-soft);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-family:var(--font-m);font-size:11px;font-weight:700;flex:none;}
+.updown{display:flex;flex-direction:column;gap:2px;}
+.updown button{width:22px;height:16px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);border-radius:4px;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.updown button:hover{border-color:var(--primary);color:var(--primary);}
+.city-weight{font-family:var(--font-m);font-size:11.5px;color:var(--text-faint);width:44px;text-align:right;}
+.remove-x{background:none;border:none;color:var(--text-faint);padding:4px;}
+.remove-x:hover{color:var(--pA);}
+.add-row{display:flex;gap:8px;margin-top:6px;}
+.add-row input,.add-row select{flex:1;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:var(--r-sm);font-size:12.4px;outline:none;}
+
+.source-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface-alt);border:1px solid var(--border-soft);border-radius:var(--r-sm);margin-bottom:8px;}
+.source-item .ico{width:36px;height:36px;border-radius:9px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;flex:none;}
+.source-item .ico svg{width:16px;height:16px;color:var(--primary);}
+.source-item .fam{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;}
+.source-item .nm{font-size:12.7px;font-weight:600;}
+.source-item .freq{font-size:11px;color:var(--text-faint);}
+.toggle{width:36px;height:20px;border-radius:20px;background:var(--surface-2);position:relative;flex:none;border:1px solid var(--border);}
+.toggle.on{background:var(--success-soft);border-color:var(--success);}
+.toggle::after{content:"";position:absolute;top:1px;left:1px;width:16px;height:16px;border-radius:50%;background:var(--text-faint);transition:.15s;}
+.toggle.on::after{background:var(--success);transform:translateX(16px);}
+.source-add-card{background:var(--primary-soft);border:1px dashed var(--primary);border-radius:var(--r-md);padding:16px 18px;margin-top:16px;}
+.source-add-card h4{font-size:12.6px;font-weight:600;margin-bottom:10px;color:var(--primary-dark);}
+.grid3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:9px;}
+
+.tag-input-row{display:flex;gap:8px;margin-top:6px;}
+.tag-input-row input{flex:1;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:var(--r-sm);font-size:12.4px;outline:none;}
+.tag-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;}
+.tag{display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--border);padding:5px 6px 5px 12px;border-radius:20px;font-size:11.4px;color:var(--text-dim);}
+.tag button{background:none;border:none;color:var(--text-faint);display:flex;padding:2px;}
+.tag button:hover{color:var(--pA);}
+
+.sched-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border-soft);font-size:12.6px;}
+.sched-row:last-child{border-bottom:none;}
+.sched-row select{background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:6px 9px;border-radius:var(--r-sm);font-size:12px;}
+.recipient-block{margin-bottom:18px;}
+.recipient-block h4{font-size:12.6px;font-weight:600;margin-bottom:9px;}
+.recipient-list{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px;}
+.recipient-chip{display:flex;align-items:center;gap:7px;background:var(--teal-soft);border:1px solid rgba(14,168,160,.25);padding:5px 6px 5px 12px;border-radius:20px;font-size:11.6px;color:#0a746e;}
+.recipient-chip button{background:none;border:none;color:#0a746e;opacity:.6;padding:2px;}
+.recipient-chip button:hover{opacity:1;}
+
+/* users & permissions */
+.users-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap;}
+.role-pill{font-size:10.6px;padding:3px 9px;border-radius:20px;font-weight:600;}
+.role-Administrateur{background:var(--primary-soft);color:var(--primary-dark);}
+.role-Direction{background:var(--pB-soft);color:var(--pB);}
+.role-Commercial{background:var(--teal-soft);color:#0a746e;}
+.role-Lecteur{background:var(--pR-soft);color:var(--pR);}
+.user-cell{display:flex;align-items:center;gap:10px;}
+.perm-table{width:100%;border-collapse:collapse;font-size:12.4px;}
+.perm-table th{text-align:left;padding:10px 12px;font-size:11px;color:var(--text-faint);border-bottom:1px solid var(--border-soft);}
+.perm-table th.role-col{text-align:center;}
+.perm-table td{padding:10px 12px;border-bottom:1px solid var(--border-soft);}
+.perm-table td.role-col{text-align:center;}
+.perm-check{width:18px;height:18px;accent-color:var(--primary);cursor:pointer;}
+.new-user-card{background:var(--teal-soft);border:1px dashed var(--teal);border-radius:var(--r-md);padding:16px 18px;margin-top:8px;}
+.new-user-card h4{font-size:12.6px;font-weight:600;margin-bottom:10px;color:#0a746e;}
+
+/* ---------- scan modal ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,17,35,.55);backdrop-filter:blur(2px);z-index:150;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .18s;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.scan-modal{background:var(--surface);border-radius:var(--r-lg);width:460px;max-width:92vw;padding:28px 28px 24px;box-shadow:var(--shadow-lg);transform:scale(.96);transition:transform .18s;}
+.modal-overlay.open .scan-modal{transform:scale(1);}
+.scan-modal-head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.scan-modal-head .ico{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--primary),var(--teal));display:flex;align-items:center;justify-content:center;flex:none;}
+.scan-modal-head .ico svg{width:20px;height:20px;color:#fff;}
+.scan-modal h3{font-family:var(--font-d);font-size:16.5px;}
+.scan-modal p.sub{font-size:12.3px;color:var(--text-faint);margin-top:2px;}
+.scan-steps{margin:20px 0 6px;display:flex;flex-direction:column;gap:4px;}
+.scan-step{display:flex;align-items:center;gap:12px;padding:10px 4px;font-size:12.8px;color:var(--text-faint);}
+.scan-step .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex:none;transition:.2s;}
+.scan-step.active{color:var(--text);}
+.scan-step.active .dot{border-color:var(--primary);animation:spin 1s linear infinite;border-top-color:transparent;}
+.scan-step.done{color:var(--text);}
+.scan-step.done .dot{border-color:var(--success);background:var(--success);}
+.scan-step.done .dot svg{width:12px;height:12px;color:#fff;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-result{margin-top:16px;padding:16px 18px;background:var(--success-soft);border-radius:var(--r-md);display:none;}
+.scan-result.show{display:block;}
+.scan-result b{display:block;font-family:var(--font-d);font-size:15px;color:var(--success);margin-bottom:4px;}
+.scan-result span{font-size:12.3px;color:var(--text-dim);}
+.scan-modal-foot{display:flex;gap:10px;margin-top:20px;}
+.scan-modal-foot .btn{flex:1;justify-content:center;}
+
+/* toast */
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--primary);padding:11px 16px;border-radius:var(--r-sm);font-size:12.5px;box-shadow:var(--shadow-lg);animation:toastin .25s ease;min-width:230px;color:var(--text);}
+@keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* ---------- intégrations ---------- */
+.conn-card{display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:var(--r-md);margin-bottom:18px;}
+.conn-card.on{background:var(--success-soft);}
+.conn-card.off{background:var(--pR-soft);}
+.conn-ico{width:44px;height:44px;border-radius:12px;background:var(--surface);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:var(--shadow-sm);}
+.conn-ico svg{width:22px;height:22px;}
+.conn-status{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;}
+.conn-status .d{width:8px;height:8px;border-radius:50%;}
+.conn-status.on{color:var(--success);}
+.conn-status.on .d{background:var(--success);box-shadow:0 0 0 3px var(--success-soft);}
+.conn-status.off{color:var(--pR);}
+.conn-status.off .d{background:var(--pR);}
+.conn-card .grow{flex:1;}
+.conn-card h4{font-size:14.5px;margin-bottom:2px;}
+.conn-card p{font-size:12px;color:var(--text-dim);}
+.map-table{width:100%;border-collapse:collapse;font-size:12.4px;}
+.map-table th{text-align:left;padding:9px 12px;font-size:10.7px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border-soft);}
+.map-table td{padding:10px 12px;border-bottom:1px solid var(--border-soft);}
+.map-arrow{color:var(--text-faint);}
+.log-table{width:100%;border-collapse:collapse;font-size:12.4px;}
+.log-table th{text-align:left;padding:9px 12px;font-size:10.7px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border-soft);}
+.log-table td{padding:10px 12px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+.log-empty{padding:30px;text-align:center;color:var(--text-faint);font-size:12.5px;}
+.sync-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:10.8px;font-weight:700;}
+.sync-ok{background:var(--success-soft);color:var(--success);}
+.sync-pending{background:var(--pB-soft);color:var(--pB);}
+.sync-fail{background:var(--pA-soft);color:var(--pA);}
+.integration-mini{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--surface-alt);border:1px solid var(--border-soft);border-radius:var(--r-sm);margin-bottom:9px;}
+.integration-mini .l{display:flex;align-items:center;gap:10px;font-size:12.6px;font-weight:600;}
+.integration-mini .l svg{width:16px;height:16px;color:var(--primary);}
+.field-input-row{display:flex;gap:8px;align-items:center;}
+.field-input-row input{flex:1;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:var(--r-sm);font-size:12.4px;outline:none;}
+
+/* email modal recipient list */
+.recip-modal-list{display:flex;flex-direction:column;gap:8px;margin:16px 0;max-height:220px;overflow-y:auto;}
+.recip-modal-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface-alt);border:1px solid var(--border-soft);border-radius:var(--r-sm);font-size:12.6px;}
+.recip-modal-item svg{width:15px;height:15px;color:var(--primary);flex:none;}
+.recip-modal-item b{font-weight:600;}
+
+
+@media (max-width:980px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:264px;transform:translateX(-100%);transition:transform .2s;}
+  .sidebar.open{transform:translateX(0);}
+  .hamburger{display:flex;}
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .radar-wrap{grid-template-columns:1fr;}
+  .radar-scope{border-right:none;border-bottom:1px solid var(--border-soft);}
+  .opp-layout,.detail-grid,.grid3{grid-template-columns:1fr;}
+  .filters-panel{position:static;}
+  .report-stats{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
+      <div class="brand-text"><b>MC RADAR</b><span>Mission Conseil Group</span></div>
+    </div>
+    <nav class="nav" id="mainNav">
+      <div class="nav-label">Pilotage</div>
+      <div class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Tableau de bord
+      </div>
+
+      <div class="nav-label">Veille commerciale</div>
+      <div class="nav-item" data-view="opportunities">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        Opportunités
+        <span class="nav-badge" id="navBadgeOpp">0</span>
+      </div>
+      <div class="subnav" id="oppSubnav">
+        <a data-preset="all">Toutes <span class="c" id="cnt-all"></span></a>
+        <a data-preset="A">Priorité A <span class="c" id="cnt-A"></span></a>
+        <a data-preset="qualif">À qualifier <span class="c" id="cnt-qualif"></span></a>
+        <a data-preset="cours">En cours de traitement <span class="c" id="cnt-cours"></span></a>
+        <a data-preset="archive">Archivées / closes <span class="c" id="cnt-archive"></span></a>
+      </div>
+      <div class="nav-item" data-view="sources">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+        Sources de veille
+      </div>
+      <div class="nav-item" data-view="keywords">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 7h.01M3 11V6a3 3 0 013-3h5l10 10-8 8L3 11z"/></svg>
+        Mots-clés &amp; typologies
+      </div>
+
+      <div class="nav-label">Rapports</div>
+      <div class="nav-item" data-view="reports" data-rep="daily">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg>
+        Rapport quotidien
+      </div>
+      <div class="nav-item" data-view="reports" data-rep="weekly">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        Rapport hebdomadaire
+      </div>
+      <div class="nav-item" data-view="reports" data-rep="monthly">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-6 3 3 5-8"/></svg>
+        Rapport mensuel
+      </div>
+
+      <div class="nav-label">Configuration</div>
+      <div class="nav-item" data-view="scoring">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V10M4 6V3M12 21v-7M12 10V3M20 21v-4M20 13V3"/><circle cx="4" cy="8" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="20" cy="16" r="2"/></svg>
+        Grille de scoring
+      </div>
+      <div class="nav-item" data-view="sectors">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M15 9h.01M15 13h.01"/></svg>
+        Secteurs prioritaires
+      </div>
+      <div class="nav-item" data-view="cities">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.6 7-12a7 7 0 10-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
+        Villes prioritaires
+      </div>
+      <div class="nav-item" data-view="diffusion">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4l16 8-16 8V4z"/></svg>
+        Alertes &amp; destinataires email
+      </div>
+      <div class="nav-item" data-view="users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Utilisateurs &amp; permissions
+      </div>
+
+      <div class="nav-label">Intégrations</div>
+      <div class="nav-item" data-view="crm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6M12 16l2 2 4-4"/></svg>
+        CRM &amp; création de leads
+        <span class="nav-badge" id="navBadgeCrm" style="background:var(--success);"></span>
+      </div>
+      <div class="nav-item" data-view="sheets">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        Google Sheets
+      </div>
+      <div class="nav-item" data-view="calendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8 14h2M13 14h2M8 18h2"/></svg>
+        Google Calendar
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="avatar">AB</div>
+      <div class="who"><b>Aziz Bouslemati</b><span>Direction commerciale</span></div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <div class="topbar">
+      <button class="icon-btn hamburger" id="hamburgerBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="globalSearch" placeholder="Rechercher un client, une ville, un mot-clé…">
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="bellBtn" title="Alertes prioritaires">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+          <span class="dot-alert"></span>
+        </button>
+        <button class="btn btn-primary" id="scanBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M12 12l4-2"/></svg>
+          Lancer une veille
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section class="view active" id="view-dashboard">
+        <div class="page-head">
+          <div>
+            <h1>Radar commercial quotidien</h1>
+            <p>Vue consolidée des opportunités détectées, qualifiées et priorisées sur l'ensemble des canaux surveillés.</p>
+          </div>
+          <div class="actions">
+            <button class="btn" id="exportDashBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              Exporter
+            </button>
+            <button class="btn btn-primary" data-goto="opportunities">Voir toutes les opportunités</button>
+          </div>
+        </div>
+
+        <div class="kpi-row" id="kpiRow"></div>
+
+        <div class="radar-wrap">
+          <div class="radar-scope">
+            <svg class="radar-svg" viewBox="0 0 300 300" id="radarSvg">
+              <defs>
+                <radialGradient id="sweepGrad" cx="0%" cy="0%" r="100%">
+                  <stop offset="0%" stop-color="#5B5FEF" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#5B5FEF" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <circle class="radar-ring" cx="150" cy="150" r="40"/>
+              <circle class="radar-ring" cx="150" cy="150" r="80"/>
+              <circle class="radar-ring" cx="150" cy="150" r="120"/>
+              <circle class="radar-ring" cx="150" cy="150" r="140" stroke-dasharray="2 3"/>
+              <line class="radar-axis" x1="150" y1="10" x2="150" y2="290"/>
+              <line class="radar-axis" x1="10" y1="150" x2="290" y2="150"/>
+              <line class="radar-axis" x1="45" y1="45" x2="255" y2="255"/>
+              <line class="radar-axis" x1="255" y1="45" x2="45" y2="255"/>
+              <g class="radar-sweep-group"><path class="radar-sweep" d="M150,150 L150,10 A140,140 0 0,1 220,32 Z"/></g>
+              <g id="radarBlips"></g>
+            </svg>
+            <div class="radar-caption">Position = urgence · Distance du centre = score commercial</div>
+          </div>
+          <div class="radar-side">
+            <h3>Répartition par secteur</h3>
+            <p class="sub">Volume d'opportunités qualifiées sur les 30 derniers jours, tous scores confondus.</p>
+            <div class="sector-bars" id="sectorBars"></div>
+            <div class="legend" style="margin-top:6px;">
+              <div class="legend-item"><span class="legend-dot" style="background:var(--pA)"></span>Priorité A — score &gt; 80</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--pB)"></span>Priorité B — 60 à 79</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--pC)"></span>Priorité C — 40 à 59</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--pR)"></span>Veille passive — &lt; 40</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>Top opportunités du jour</h2><a href="#" data-goto="opportunities">Tout afficher →</a></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th class="no-sort">Opportunité</th><th class="no-sort">Secteur</th><th class="no-sort">Ville</th><th class="no-sort">Score</th><th class="no-sort">Priorité</th><th class="no-sort">Statut</th><th class="no-sort">Deadline</th><th class="no-sort"></th></tr></thead>
+            <tbody id="dashTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ OPPORTUNITIES LIST ============ -->
+      <section class="view" id="view-opportunities">
+        <div class="page-head">
+          <div><h1 id="oppTitle">Opportunités</h1><p>Base consultable, filtrable et exportable de toutes les opportunités collectées par l'agent.</p></div>
+          <div class="actions">
+            <button class="btn" id="exportCsvBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              Exporter CSV
+            </button>
+            <button class="btn" id="exportXlsxBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+              Exporter Excel
+            </button>
+            <button class="btn" id="exportSheetsBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 2H5a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2V9z"/><path d="M9 2v7h7"/><path d="M8 13h8M8 17h5"/></svg>
+              Envoyer vers Google Sheets
+            </button>
+          </div>
+        </div>
+        <div class="opp-layout">
+          <div class="filters-panel">
+            <h3>Filtres <button id="resetFiltersBtn">réinitialiser</button></h3>
+            <div class="filter-group"><label>Secteur</label><select id="fSecteur"><option value="">Tous les secteurs</option></select></div>
+            <div class="filter-group"><label>Ville</label><select id="fVille"><option value="">Toutes les villes</option></select></div>
+            <div class="filter-group"><label>Type d'opportunité</label><select id="fType"><option value="">Tous les types</option></select></div>
+            <div class="filter-group"><label>Statut</label><select id="fStatut"><option value="">Tous les statuts</option></select></div>
+            <div class="filter-group"><label>Priorité</label>
+              <div class="chip-group" id="fPriorite">
+                <button class="chip" data-p="A">A</button><button class="chip" data-p="B">B</button><button class="chip" data-p="C">C</button><button class="chip" data-p="R">Rejet</button>
+              </div>
+            </div>
+            <div class="filter-group"><label>Score minimum</label>
+              <div class="range-row"><input type="range" id="fScore" min="0" max="100" value="0"><span class="range-val" id="fScoreVal">0</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="table-wrap">
+              <div class="table-toolbar">
+                <div class="mini-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="oppMiniSearch" placeholder="Filtrer les résultats…"></div>
+                <span id="resultsCount" style="margin-left:auto;font-size:12px;color:var(--text-faint);">— opportunités</span>
+              </div>
+              <table>
+                <thead><tr>
+                  <th data-sort="titre">Opportunité <span class="arrow"></span></th>
+                  <th data-sort="secteur">Secteur <span class="arrow"></span></th>
+                  <th data-sort="ville">Ville <span class="arrow"></span></th>
+                  <th class="no-sort">Source</th>
+                  <th data-sort="score">Score <span class="arrow"></span></th>
+                  <th data-sort="priorite">Priorité <span class="arrow"></span></th>
+                  <th class="no-sort">Statut</th>
+                  <th class="no-sort">Affecté</th><th class="no-sort"></th>
+                </tr></thead>
+                <tbody id="oppTableBody"></tbody>
+              </table>
+              <div class="pagination" id="oppPagination"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ OPPORTUNITY DETAIL (page dédiée) ============ -->
+      <section class="view" id="view-detail">
+        <div class="detail-topbar">
+          <button class="back-btn" id="backFromDetailBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>Retour à la liste des opportunités</button>
+        </div>
+        <div id="detailContent"></div>
+      </section>
+
+      <!-- ============ SOURCES ============ -->
+      <section class="view" id="view-sources">
+        <div class="page-head">
+          <div><h1>Sources de veille</h1><p>Canaux surveillés par l'agent : sites institutionnels, marchés publics, réseaux sociaux, médias, événements…</p></div>
+        </div>
+        <div class="panel-card">
+          <div class="table-toolbar" style="padding:0 0 16px;border:none;">
+            <div class="mini-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="sourceSearch" placeholder="Rechercher une source…"></div>
+          </div>
+          <div class="source-list cards-grid" id="sourceList"></div>
+          <div class="pagination" id="sourcePagination" style="border-top:1px solid var(--border-soft);margin-top:4px;"></div>
+          <div class="source-add-card">
+            <h4>Ajouter une source de veille</h4>
+            <div class="grid3">
+              <input type="text" id="newSourceName" placeholder="Nom de la source (ex : Portail Marchés Publics)">
+              <select id="newSourceFamille">
+                <option>Institutionnel</option><option>Appels d'offres</option><option>Réseaux sociaux</option><option>Médias</option><option>Événements</option><option>Email</option><option>Interne</option>
+              </select>
+              <select id="newSourceFreq"><option>Quotidienne</option><option>Hebdomadaire</option><option>Mensuelle</option></select>
+            </div>
+            <button class="btn btn-primary btn-sm" id="addSourceBtn" style="margin-top:11px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Ajouter la source
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ KEYWORDS ============ -->
+      <section class="view" id="view-keywords">
+        <div class="page-head"><div><h1>Mots-clés &amp; typologies</h1><p>Utilisés par l'extraction IA pour classer les contenus collectés selon la typologie d'opportunité.</p></div></div>
+        <div class="panel-card">
+          <h3>Mots-clés surveillés</h3>
+          <p class="hint">Chaque mot-clé déclenche une analyse approfondie du contenu source par le moteur NLP.</p>
+          <div class="tag-input-row"><input type="text" id="newKeywordInput" placeholder="Ajouter un mot-clé…"><button class="btn btn-sm btn-primary" id="addKeywordBtn">Ajouter</button></div>
+          <div class="tag-list" id="keywordList"></div>
+        </div>
+        <div class="panel-card">
+          <h3>Typologies d'opportunités</h3>
+          <p class="hint">Catégories utilisées pour classer automatiquement chaque opportunité détectée.</p>
+          <div class="tag-list" id="typoList"></div>
+        </div>
+      </section>
+
+      <!-- ============ REPORTS ============ -->
+      <section class="view" id="view-reports">
+        <div class="page-head">
+          <div><h1>Rapports</h1><p>Générés automatiquement par l'agent à partir des opportunités collectées, qualifiées et scorées.</p></div>
+          <div class="actions">
+            <button class="btn" id="sendReportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>Envoyer par email</button>
+            <button class="btn btn-primary" id="downloadReportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>Télécharger</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-rep="daily">Quotidien</button>
+          <button class="tab" data-rep="weekly">Hebdomadaire</button>
+          <button class="tab" data-rep="monthly">Mensuel</button>
+        </div>
+        <div class="report-card" id="reportCard"></div>
+      </section>
+
+      <!-- ============ SCORING ============ -->
+      <section class="view" id="view-scoring">
+        <div class="page-head"><div><h1>Grille de scoring</h1><p>Ajustez les coefficients de chaque critère de qualification. Le total doit rester égal à 100 % ; les scores de toutes les opportunités sont recalculés en direct.</p></div></div>
+        <div class="config-grid">
+          <div class="panel-card">
+            <h3>Pondération des critères</h3>
+            <p class="hint">Ces coefficients s'appliquent au score /100 de chaque opportunité collectée.</p>
+            <div id="weightRows"></div>
+            <div class="weight-total"><span>Total pondération</span><b id="weightTotal" class="ok">100%</b></div>
+          </div>
+          <div>
+            <div class="panel-card">
+              <h3>Seuils de priorisation</h3>
+              <p class="hint">Détermine à partir de quel score une opportunité passe en priorité A, B ou C.</p>
+              <div class="thresh-grid">
+                <div class="thresh-item" style="background:var(--pA-soft);color:var(--pA);"><span>Priorité A ≥</span><input type="number" id="thA" value="80"></div>
+                <div class="thresh-item" style="background:var(--pB-soft);color:var(--pB);"><span>Priorité B ≥</span><input type="number" id="thB" value="60"></div>
+                <div class="thresh-item" style="background:var(--pC-soft);color:var(--pC);"><span>Priorité C ≥</span><input type="number" id="thC" value="40"></div>
+              </div>
+            </div>
+            <div class="panel-card">
+              <h3>Répartition actuelle</h3>
+              <p class="hint">Nombre d'opportunités par niveau de priorité avec la grille actuelle.</p>
+              <div id="scoringDistribution"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SECTORS ============ -->
+      <section class="view" id="view-sectors">
+        <div class="page-head"><div><h1>Secteurs prioritaires</h1><p>Définit les secteurs d'activité à privilégier dans la qualification des opportunités.</p></div></div>
+        <div class="panel-card">
+          <h3>Niveau de priorité par secteur</h3>
+          <p class="hint">Impacte le critère « Qualité du prospect » de la grille de scoring. <span id="sectorCountHint"></span></p>
+          <div id="sectorRows"></div>
+          <div class="add-row"><input type="text" id="newSectorInput" placeholder="Ajouter un secteur…"><button class="btn btn-sm btn-primary" id="addSectorBtn">Ajouter</button></div>
+        </div>
+      </section>
+
+      <!-- ============ CITIES ============ -->
+      <section class="view" id="view-cities">
+        <div class="page-head"><div><h1>Villes prioritaires</h1><p>Ordre de priorité géographique utilisé par le critère « Localisation » du scoring.</p></div></div>
+        <div class="panel-card">
+          <h3>Classement des villes</h3>
+          <p class="hint">Utilisez les flèches pour réordonner ; le poids se recalcule automatiquement selon le rang. <span id="cityCountHint"></span></p>
+          <div id="cityRows"></div>
+          <div class="add-row"><input type="text" id="newCityInput" placeholder="Ajouter une ville…"><button class="btn btn-sm btn-primary" id="addCityBtn">Ajouter</button></div>
+        </div>
+      </section>
+
+      <!-- ============ DIFFUSION ============ -->
+      <section class="view" id="view-diffusion">
+        <div class="page-head"><div><h1>Alertes &amp; destinataires email</h1><p>Configuration des adresses qui reçoivent les rapports et alertes générés par l'agent, par cadence.</p></div></div>
+        <div class="config-grid">
+          <div class="panel-card">
+            <h3>Destinataires</h3>
+            <p class="hint">Ajoutez ou retirez un destinataire pour chaque cadence de rapport.</p>
+            <div class="recipient-block">
+              <h4>Rapport quotidien</h4>
+              <div class="recipient-list" id="recipDaily"></div>
+              <div class="tag-input-row"><input type="text" id="recipDailyInput" placeholder="email@missionconseil.ma"><button class="btn btn-sm" data-rep="daily" data-action="addRecip">Ajouter</button></div>
+            </div>
+            <div class="recipient-block">
+              <h4>Rapport hebdomadaire</h4>
+              <div class="recipient-list" id="recipWeekly"></div>
+              <div class="tag-input-row"><input type="text" id="recipWeeklyInput" placeholder="email@missionconseil.ma"><button class="btn btn-sm" data-rep="weekly" data-action="addRecip">Ajouter</button></div>
+            </div>
+            <div class="recipient-block" style="margin-bottom:0;">
+              <h4>Rapport mensuel</h4>
+              <div class="recipient-list" id="recipMonthly"></div>
+              <div class="tag-input-row"><input type="text" id="recipMonthlyInput" placeholder="email@missionconseil.ma"><button class="btn btn-sm" data-rep="monthly" data-action="addRecip">Ajouter</button></div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h3>Horaires de génération</h3>
+            <p class="hint">Fréquence et heure de déclenchement de chaque rapport automatique.</p>
+            <div class="sched-row"><span>Rapport quotidien</span><select><option>08:00</option><option selected>08:30</option><option>09:00</option></select></div>
+            <div class="sched-row"><span>Rapport hebdomadaire</span><select><option>Lundi 08:00</option><option selected>Vendredi 17:00</option></select></div>
+            <div class="sched-row"><span>Rapport mensuel</span><select><option selected>1er du mois</option><option>Dernier jour du mois</option></select></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ USERS & PERMISSIONS ============ -->
+      <section class="view" id="view-users">
+        <div class="page-head"><div><h1>Utilisateurs &amp; permissions</h1><p>Gestion des accès à la plateforme : création de comptes, rôles et permissions associées.</p></div></div>
+
+        <div class="panel-card">
+          <div class="users-toolbar">
+            <h3 style="margin:0;">Utilisateurs (<span id="userCount">0</span>)</h3>
+            <div class="mini-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="userSearch" placeholder="Rechercher un utilisateur…"></div>
+          </div>
+          <table>
+            <thead><tr><th data-usort="nom">Utilisateur <span class="arrow"></span></th><th data-usort="role">Rôle <span class="arrow"></span></th><th class="no-sort">Statut</th><th class="no-sort"></th></tr></thead>
+            <tbody id="usersTable"></tbody>
+          </table>
+          <div class="new-user-card">
+            <h4>Inviter un utilisateur</h4>
+            <div class="grid3">
+              <input type="text" id="newUserName" placeholder="Nom complet">
+              <input type="text" id="newUserEmail" placeholder="Adresse email">
+              <select id="newUserRole"><option>Commercial</option><option>Direction</option><option>Administrateur</option><option>Lecteur</option></select>
+            </div>
+            <button class="btn btn-primary btn-sm" id="addUserBtn" style="margin-top:11px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Ajouter l'utilisateur
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h3>Matrice des permissions par rôle</h3>
+          <p class="hint">Cochez les actions autorisées pour chaque rôle. Les modifications s'appliquent immédiatement.</p>
+          <table class="perm-table">
+            <thead><tr><th>Permission</th><th class="role-col">Administrateur</th><th class="role-col">Direction</th><th class="role-col">Commercial</th><th class="role-col">Lecteur</th></tr></thead>
+            <tbody id="permTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ CRM ============ -->
+      <section class="view" id="view-crm">
+        <div class="page-head"><div><h1>CRM &amp; création automatique de leads</h1><p>Lorsqu'une opportunité est validée dans MC Radar, elle est automatiquement créée comme lead dans le CRM du client — sans ressaisie manuelle.</p></div>
+          <div class="actions"><button class="btn btn-primary" id="forceSyncCrmBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M12 12l4-2"/></svg>
+            Forcer la synchronisation
+          </button></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="conn-card" id="crmConnCard"></div>
+          <div class="grid3" style="grid-template-columns:1fr 1fr;">
+            <div>
+              <label style="display:block;font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;">CRM cible</label>
+              <select id="crmProviderSelect" style="width:100%;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:var(--r-sm);font-size:12.6px;">
+                <option>HubSpot</option><option>Salesforce</option><option>Zoho CRM</option><option>Microsoft Dynamics</option><option>Odoo CRM</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;">Pipeline de destination</label>
+              <select id="crmPipelineSelect" style="width:100%;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:var(--r-sm);font-size:12.6px;">
+                <option>Prospection commerciale</option><option>Opportunités événementielles</option><option>Grands comptes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h3>Correspondance des champs</h3>
+          <p class="hint">Chaque champ d'une opportunité MC Radar est mappé vers un champ équivalent dans le CRM lors de la création du lead.</p>
+          <table class="map-table">
+            <thead><tr><th>Champ MC Radar</th><th></th><th>Champ CRM</th></tr></thead>
+            <tbody>
+              <tr><td>Titre de l'opportunité</td><td class="map-arrow">→</td><td>Nom de l'affaire (Deal Name)</td></tr>
+              <tr><td>Organisateur / client</td><td class="map-arrow">→</td><td>Société (Company)</td></tr>
+              <tr><td>Ville</td><td class="map-arrow">→</td><td>Localisation</td></tr>
+              <tr><td>Score commercial (/100)</td><td class="map-arrow">→</td><td>Score personnalisé « MC Score »</td></tr>
+              <tr><td>Priorité (A/B/C)</td><td class="map-arrow">→</td><td>Étiquette de priorité</td></tr>
+              <tr><td>Statut de traitement</td><td class="map-arrow">→</td><td>Étape du pipeline</td></tr>
+              <tr><td>Commercial affecté</td><td class="map-arrow">→</td><td>Propriétaire de l'affaire (Owner)</td></tr>
+              <tr><td>Date limite</td><td class="map-arrow">→</td><td>Date de clôture prévisionnelle</td></tr>
+              <tr><td>Lien source + extrait</td><td class="map-arrow">→</td><td>Note interne à la création</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel-card">
+          <h3>Journal de synchronisation</h3>
+          <p class="hint">Historique des leads créés automatiquement dans le CRM à la validation d'une opportunité.</p>
+          <table class="log-table">
+            <thead><tr><th>Opportunité</th><th>Référence CRM</th><th>Envoyé le</th><th>Statut</th><th></th></tr></thead>
+            <tbody id="crmLogBody"></tbody>
+          </table>
+          <div id="crmLogEmpty" class="log-empty hidden">Aucun lead envoyé pour le moment. Validez une opportunité pour déclencher la création automatique.</div>
+        </div>
+      </section>
+
+      <!-- ============ GOOGLE SHEETS ============ -->
+      <section class="view" id="view-sheets">
+        <div class="page-head"><div><h1>Intégration Google Sheets</h1><p>Transfert des opportunités et des données pertinentes vers le Google Sheets du client, en un clic ou automatiquement.</p></div>
+          <div class="actions"><button class="btn btn-primary" id="syncSheetsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M12 12l4-2"/></svg>
+            Synchroniser maintenant
+          </button></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="conn-card" id="sheetsConnCard"></div>
+          <label style="display:block;font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;">Lien du Google Sheets connecté</label>
+          <div class="field-input-row">
+            <input type="text" id="sheetsUrlInput" value="https://docs.google.com/spreadsheets/d/1MissionConseil-Veille-Commerciale/edit">
+            <button class="btn btn-sm" id="saveSheetsUrlBtn">Enregistrer</button>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h3>Colonnes transférées</h3>
+          <p class="hint">Structure des données envoyées vers l'onglet « Opportunités » du Google Sheets.</p>
+          <div class="tag-list" id="sheetsColumnsList" style="margin-top:0;"></div>
+        </div>
+
+        <div class="panel-card">
+          <h3>Historique des synchronisations</h3>
+          <table class="log-table">
+            <thead><tr><th>Date</th><th>Lignes transférées</th><th>Déclenché par</th><th>Statut</th></tr></thead>
+            <tbody id="sheetsLogBody"></tbody>
+          </table>
+          <div id="sheetsLogEmpty" class="log-empty hidden">Aucune synchronisation effectuée pour le moment.</div>
+        </div>
+      </section>
+
+      <!-- ============ GOOGLE CALENDAR ============ -->
+      <section class="view" id="view-calendar">
+        <div class="page-head"><div><h1>Intégration Google Calendar</h1><p>Création automatique de rappels pour les dates limites et événements prioritaires, directement dans le calendrier du client.</p></div>
+          <div class="actions"><button class="btn btn-primary" id="bulkCalendarBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+            Créer les rappels pour les échéances &lt; 14 jours
+          </button></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="conn-card" id="calendarConnCard"></div>
+          <div class="grid3" style="grid-template-columns:1fr 1fr;">
+            <div>
+              <label style="display:block;font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;">Compte Google connecté</label>
+              <input type="text" value="a.bouslemati@missionconseil.ma" disabled style="width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);padding:9px 11px;border-radius:var(--r-sm);font-size:12.6px;">
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;">Calendrier de destination</label>
+              <select id="calendarNameSelect" style="width:100%;background:var(--surface-alt);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:var(--r-sm);font-size:12.6px;">
+                <option>Opportunités commerciales</option><option>Échéances marchés publics</option><option>Agenda direction</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h3>Rappels créés</h3>
+          <p class="hint">Chaque rappel reprend le titre de l'opportunité, la date limite et un lien vers sa fiche dans MC Radar.</p>
+          <table class="log-table">
+            <thead><tr><th>Événement</th><th>Date du rappel</th><th>Opportunité liée</th><th>Statut</th></tr></thead>
+            <tbody id="calendarLogBody"></tbody>
+          </table>
+          <div id="calendarLogEmpty" class="log-empty hidden">Aucun rappel créé pour le moment.</div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCAN MODAL ============ -->
+<div class="modal-overlay" id="scanOverlay">
+  <div class="scan-modal">
+    <div class="scan-modal-head">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M12 12l4-2"/></svg></div>
+      <div><h3>Veille en cours</h3><p class="sub">Analyse des sources actives configurées</p></div>
+    </div>
+    <div class="scan-steps" id="scanSteps"></div>
+    <div class="scan-result" id="scanResult"></div>
+    <div class="scan-modal-foot">
+      <button class="btn" id="scanCancelBtn">Fermer</button>
+      <button class="btn btn-primary hidden" id="scanSeeResultsBtn">Voir les opportunités</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EMAIL SEND MODAL ============ -->
+<div class="modal-overlay" id="emailOverlay">
+  <div class="scan-modal">
+    <div class="scan-modal-head">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+      <div><h3 id="emailModalTitle">Envoyer le rapport</h3><p class="sub">Vérifiez les destinataires avant l'envoi</p></div>
+    </div>
+    <p style="font-size:12.4px;color:var(--text-dim);margin-top:14px;">Ce rapport sera envoyé par email aux adresses suivantes :</p>
+    <div class="recip-modal-list" id="emailModalList"></div>
+    <div class="tag-input-row">
+      <input type="text" id="emailModalInput" placeholder="Ajouter un destinataire ponctuel…">
+      <button class="btn btn-sm" id="emailModalAddBtn">Ajouter</button>
+    </div>
+    <div class="scan-modal-foot">
+      <button class="btn" id="emailModalCancelBtn">Annuler</button>
+      <button class="btn btn-primary" id="emailModalSendBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Envoyer maintenant
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* =========================================================
+   DONNÉES DE RÉFÉRENCE
+   ========================================================= */
+let SOURCES = [
+  {id:'s1', nom:"Portail Marchés Publics (marchespublics.gov.ma)", famille:"Appels d'offres", freq:'Quotidienne', actif:true},
+  {id:'s2', nom:'Sites institutionnels (ministères, agences)', famille:'Institutionnel', freq:'Quotidienne', actif:true},
+  {id:'s3', nom:'LinkedIn — comptes entreprises & institutions', famille:'Réseaux sociaux', freq:'Quotidienne', actif:true},
+  {id:'s4', nom:'Presse économique (Les Eco, La Vie Éco, Médias24)', famille:'Médias', freq:'Quotidienne', actif:true},
+  {id:'s5', nom:"Sites d'événements & salons professionnels", famille:'Événements', freq:'Hebdomadaire', actif:true},
+  {id:'s6', nom:'X / Twitter — hashtags sectoriels', famille:'Réseaux sociaux', freq:'Quotidienne', actif:false},
+  {id:'s7', nom:'Newsletters abonnées (autorisées)', famille:'Email', freq:'Quotidienne', actif:true},
+  {id:'s8', nom:'CRM interne — pipeline & historique clients', famille:'Interne', freq:'Mensuelle', actif:false},
+  {id:'s9', nom:'Portails des marchés publics régionaux', famille:"Appels d'offres", freq:'Quotidienne', actif:true},
+  {id:'s10', nom:'Chambres de commerce et d\'industrie (CCI)', famille:'Institutionnel', freq:'Hebdomadaire', actif:true},
+  {id:'s11', nom:'Sites d\'ambassades et consulats étrangers', famille:'Institutionnel', freq:'Hebdomadaire', actif:true},
+  {id:'s12', nom:'Plateformes sectorielles BTP & construction', famille:'Événements', freq:'Hebdomadaire', actif:true},
+  {id:'s13', nom:'Plateformes sectorielles santé & pharma', famille:'Événements', freq:'Hebdomadaire', actif:false},
+  {id:'s14', nom:'YouTube — chaînes institutionnelles & médias', famille:'Réseaux sociaux', freq:'Hebdomadaire', actif:true},
+  {id:'s15', nom:'Facebook — pages événementielles régionales', famille:'Réseaux sociaux', freq:'Quotidienne', actif:true},
+  {id:'s16', nom:'Google Alerts — mots-clés sectoriels', famille:'Médias', freq:'Quotidienne', actif:true},
+  {id:'s17', nom:'Bulletins officiels des marchés publics (BOMP)', famille:"Appels d'offres", freq:'Hebdomadaire', actif:true},
+  {id:'s18', nom:'Agences de développement régional (AREF/CRI)', famille:'Institutionnel', freq:'Mensuelle', actif:false},
+];
+
+let KEYWORDS = ['événement','conférence','salon','symposium','forum','congrès','séminaire','festival',
+  'inauguration','lancement','appel d\'offres','consultation','demande de devis','marché public','stand',
+  'exposition','fan zone','sponsor','activation de marque','roadshow','convention','team building',
+  'scénographie','mobilier événementiel'];
+
+const TYPOLOGIES = ['Événementiel','Commercial direct','Stratégique','Institutionnel','Sponsoring'];
+
+let CITIES = [
+  {nom:'Rabat', poids:100},{nom:'Casablanca', poids:94},{nom:'Marrakech', poids:86},
+  {nom:'Tanger', poids:78},{nom:'Fès', poids:70},{nom:'Agadir', poids:62},
+  {nom:'Oujda', poids:54},{nom:'Kénitra', poids:48},{nom:'Tétouan', poids:42},
+  {nom:'El Jadida', poids:36},{nom:'Essaouira', poids:30},{nom:'Meknès', poids:26},
+  {nom:'Nador', poids:20},{nom:'Safi', poids:16},{nom:'Béni Mellal', poids:12},
+  {nom:'Laâyoune', poids:10},{nom:'Dakhla', poids:8},
+];
+
+let SECTORS = [
+  {nom:'Institutionnel', niveau:'Élevée'},{nom:'Banque', niveau:'Élevée'},{nom:'Sport', niveau:'Élevée'},
+  {nom:'Corporate', niveau:'Moyenne'},{nom:'ONG', niveau:'Moyenne'},{nom:'Exposition', niveau:'Moyenne'},
+  {nom:'Culture', niveau:'Faible'},{nom:'Éducation', niveau:'Moyenne'},{nom:'Santé', niveau:'Moyenne'},
+  {nom:'Énergie', niveau:'Élevée'},{nom:'Télécom', niveau:'Moyenne'},
+];
+
+let USERS = [
+  {id:'u1', nom:'Aziz Bouslemati', role:'Direction', email:'a.bouslemati@missionconseil.ma', actif:true},
+  {id:'u2', nom:'Yassine El Amrani', role:'Commercial', email:'y.elamrani@missionconseil.ma', actif:true},
+  {id:'u3', nom:'Nadia Chraibi', role:'Commercial', email:'n.chraibi@missionconseil.ma', actif:true},
+  {id:'u4', nom:'Karim Ouazzani', role:'Administrateur', email:'k.ouazzani@missionconseil.ma', actif:true},
+  {id:'u5', nom:'Amine Tazi', role:'Lecteur', email:'a.tazi@missionconseil.ma', actif:false},
+  {id:'u6', nom:'Salma Idrissi', role:'Commercial', email:'s.idrissi@missionconseil.ma', actif:true},
+  {id:'u7', nom:'Hamza Benjelloun', role:'Commercial', email:'h.benjelloun@missionconseil.ma', actif:true},
+  {id:'u8', nom:'Imane Sqalli', role:'Lecteur', email:'i.sqalli@missionconseil.ma', actif:true},
+  {id:'u9', nom:'Rachid Fassi', role:'Administrateur', email:'r.fassi@missionconseil.ma', actif:true},
+  {id:'u10', nom:'Widad Alaoui', role:'Direction', email:'w.alaoui@missionconseil.ma', actif:true},
+];
+
+const ROLES = ['Administrateur','Direction','Commercial','Lecteur'];
+const PERMISSIONS = [
+  {key:'view', label:'Consulter les opportunités'},
+  {key:'validate', label:'Valider / rejeter une opportunité'},
+  {key:'assign', label:'Affecter à un commercial'},
+  {key:'scoring', label:'Modifier la grille de scoring'},
+  {key:'sources', label:'Gérer les sources de veille'},
+  {key:'users', label:'Gérer les utilisateurs'},
+  {key:'export', label:'Exporter les données'},
+  {key:'reports', label:'Envoyer les rapports'},
+];
+let PERMS = {
+  Administrateur:{view:true,validate:true,assign:true,scoring:true,sources:true,users:true,export:true,reports:true},
+  Direction:{view:true,validate:true,assign:true,scoring:true,sources:false,users:true,export:true,reports:true},
+  Commercial:{view:true,validate:true,assign:false,scoring:false,sources:false,users:false,export:true,reports:false},
+  Lecteur:{view:true,validate:false,assign:false,scoring:false,sources:false,users:false,export:false,reports:false},
+};
+
+let RECIPIENTS = {
+  daily:['direction@missionconseil.ma','y.elamrani@missionconseil.ma'],
+  weekly:['direction@missionconseil.ma','n.chraibi@missionconseil.ma'],
+  monthly:['direction@missionconseil.ma'],
+};
+
+/* ============ INTÉGRATIONS : CRM / Google Sheets / Google Calendar ============ */
+let CRM_CONFIG = {connected:true, provider:'HubSpot', pipeline:'Prospection commerciale'};
+let SHEETS_CONFIG = {connected:true, url:'https://docs.google.com/spreadsheets/d/1MissionConseil-Veille-Commerciale/edit'};
+let CALENDAR_CONFIG = {connected:true, account:'a.bouslemati@missionconseil.ma', calendarName:'Opportunités commerciales'};
+const SHEETS_COLUMNS = ['ID','Titre','Secteur','Ville','Organisateur','Score','Priorité','Statut','Commercial affecté','Date limite','Source'];
+let CRM_LOG = []; // {oppId, titre, ref, date, statut}
+let SHEETS_LOG = []; // {date, rows, by, statut}
+let CALENDAR_LOG = []; // {titre, date, oppId, statut}
+let CRM_REFS = {}; // oppId -> ref CRM déjà créée
+
+function crmRefFor(oppId){
+  if(CRM_REFS[oppId]) return CRM_REFS[oppId];
+  const ref = 'CRM-'+(48000+Object.keys(CRM_REFS).length+1);
+  CRM_REFS[oppId]=ref;
+  return ref;
+}
+function pushToCrm(o){
+  const ref = crmRefFor(o.id);
+  CRM_LOG.unshift({oppId:o.id, titre:o.titre, ref, date:'16 août 2026 · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), statut:'Envoyé'});
+  toast('Lead créé dans '+CRM_CONFIG.provider+' — réf. '+ref);
+  renderAll();
+}
+function pushToSheets(count, by){
+  SHEETS_LOG.unshift({date:'16 août 2026 · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), rows:count, by, statut:'Synchronisé'});
+  toast(count+' ligne(s) envoyée(s) vers Google Sheets');
+  renderAll();
+}
+function createCalendarReminder(o){
+  CALENDAR_LOG.unshift({titre:'Deadline — '+o.titre, date:fmtDate(o.dateLimite)+' 2026', oppId:o.id, statut:'Créé'});
+  toast('Rappel créé dans Google Calendar ('+CALENDAR_CONFIG.account+')');
+  renderAll();
+}
+
+let WEIGHTS = {adequation:25, potentiel:20, urgence:15, qualite:15, localisation:10, fiabilite:10, accessibilite:5};
+const WEIGHT_LABELS = {
+  adequation:['Adéquation métier','Correspondance avec les prestations Mission Conseil'],
+  potentiel:['Potentiel financier','Budget estimé, taille, nombre de participants'],
+  urgence:['Urgence commerciale','Date limite, délai de réponse'],
+  qualite:['Qualité du prospect','Institution, banque, ONG, décideur identifié'],
+  localisation:['Localisation','Maroc prioritaire : Rabat, Casa, Marrakech…'],
+  fiabilite:['Niveau de fiabilité','Source officielle, recoupement'],
+  accessibilite:['Accessibilité commerciale','Contact disponible, canal identifié'],
+};
+let THRESH = {A:80, B:60, C:40};
+
+const STATUTS = ['Nouveau','À qualifier','À traiter','En analyse','Contact à faire','Contacté',
+  'Devis / pitch à préparer','Réponse envoyée','Gagné','Perdu','Archivé','Non pertinent'];
+
+/* Chaque opportunité stocke des scores BRUTS (0-100) par critère + une provenance précise */
+const RAW = [
+  {id:'OPP-2601', titre:"Aménagement du pavillon Maroc — Salon international de l'agriculture (SIAM)", type:'Salon / exposition', secteur:'Institutionnel', organisateur:'Ministère de l\'Agriculture', ville:'Meknès', lieu:'Parc des expositions, Meknès', dateEv:'2026-04-14', dateLimite:'2026-02-20', source:'Portail Marchés Publics', url:'https://www.marchespublics.gov.ma/consultation/14-2026', confiance:'Élevé',
+   emplacement:"Rubrique « Consultations en cours » > Avis n°14/2026", methode:'Connecteur API officiel (marchespublics.gov.ma)', datePub:'2026-08-10',
+   resume:"Consultation pour la conception, fabrication et installation du stand institutionnel du pavillon Maroc au SIAM 2026 : scénographie, mobilier premium, signalétique et régie technique sur 450 m².",
+   extrait:"« Avis de consultation n°14/2026 — aménagement et équipement du pavillon institutionnel, surface 450 m², délai d'exécution 6 semaines. »",
+   crit:{adequation:96, potentiel:88, urgence:78, qualite:92, localisation:100, fiabilite:95, accessibilite:70},
+   statut:'À traiter', commercial:'Yassine El Amrani', action:'Préparer un dossier de candidature complet', collecte:'2026-08-12', maj:'2026-08-15'},
+
+  {id:'OPP-2602', titre:"Fan zones & activations sponsors — Coupe d'Afrique des Nations 2026", type:'Sport / activation marque', secteur:'Sport', organisateur:'Comité d\'organisation CAN 2026', ville:'Casablanca', lieu:'Grand Casablanca — sites officiels', dateEv:'2026-12-05', dateLimite:'2026-09-30', source:"Sites d'événements & salons", url:'https://www.can2026.ma/appel-partenaires', confiance:'Élevé',
+   emplacement:"Page « Appel à partenaires » > section Fan Zones", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-13',
+   resume:"Appel à partenaires pour la conception et l'exploitation des fan zones officielles : structures, mobilier, signalétique, production technique et hospitalité pour la durée de la compétition.",
+   extrait:"« Les prestataires intéressés par l'aménagement des fan zones sont invités à soumettre leur dossier avant le 30 septembre. »",
+   crit:{adequation:98, potentiel:97, urgence:60, qualite:96, localisation:95, fiabilite:90, accessibilite:60},
+   statut:'Nouveau', commercial:null, action:'Qualifier en urgence — fort potentiel', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2603', titre:'Congrès annuel de la Banque Africaine de Développement', type:'Congrès institutionnel', secteur:'Banque', organisateur:'BAD — Bureau régional Maroc', ville:'Rabat', lieu:'Sofitel Jardin des Roses, Rabat', dateEv:'2026-10-08', dateLimite:'2026-09-01', source:'Sites institutionnels', url:'https://www.afdb.org/fr/actualites/congres-regional-rabat', confiance:'Moyen',
+   emplacement:"Page « Actualités » > communiqué du 10 août 2026", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-10',
+   resume:"Organisation logistique et scénographique du congrès régional : régie, signalétique, mobilier d'accueil, traduction simultanée et gestion des espaces VIP pour 600 délégués.",
+   extrait:"« La BAD confirme la tenue de son congrès régional à Rabat en octobre, réunissant plus de 600 participants institutionnels. »",
+   crit:{adequation:82, potentiel:80, urgence:55, qualite:94, localisation:100, fiabilite:75, accessibilite:55},
+   statut:'À qualifier', commercial:null, action:'Identifier le contact organisateur', collecte:'2026-08-10', maj:'2026-08-13'},
+
+  {id:'OPP-2604', titre:"Inauguration de la nouvelle usine — groupe industriel", type:'Événement corporate', secteur:'Corporate', organisateur:'Groupe industriel (Tanger Automotive City)', ville:'Tanger', lieu:'Tanger Automotive City', dateEv:'2026-11-20', dateLimite:'2026-10-15', source:'Presse économique', url:'https://www.leseco.ma/entreprises/inauguration-usine-tanger', confiance:'Moyen',
+   emplacement:"Article « Entreprises » publié le 5 août 2026", methode:'Flux RSS média', datePub:'2026-08-05',
+   resume:"Cérémonie d'inauguration attendue avec délégation officielle et partenaires internationaux : scénographie d'entrée, signalétique, traiteur et régie audiovisuelle.",
+   extrait:"« Le groupe annonce l'inauguration de sa nouvelle unité de production à Tanger, prévue au dernier trimestre 2026. »",
+   crit:{adequation:74, potentiel:70, urgence:40, qualite:78, localisation:85, fiabilite:65, accessibilite:45},
+   statut:'En analyse', commercial:'Nadia Chraibi', action:'Surveiller — recontacter à 6 semaines de l\'échéance', collecte:'2026-08-05', maj:'2026-08-11'},
+
+  {id:'OPP-2605', titre:"Team building annuel — compagnie d'assurance", type:'Événement corporate', secteur:'Corporate', organisateur:"Compagnie d'assurance (siège Casablanca)", ville:'Casablanca', lieu:'Domaine privé, région de Casablanca', dateEv:'2026-09-18', dateLimite:'2026-08-25', source:'LinkedIn', url:'https://www.linkedin.com/company/assurance-ma/posts', confiance:'Faible',
+   emplacement:"Publication RH sur la page entreprise, 13 août 2026", methode:'Connecteur API partenaire LinkedIn', datePub:'2026-08-13',
+   resume:"Signal détecté via publication RH évoquant l'organisation d'un séminaire annuel pour 300 collaborateurs : animation, restauration, logistique et team building.",
+   extrait:"« Notre équipe RH prépare un moment fort pour nos 300 collaborateurs ce trimestre. »",
+   crit:{adequation:68, potentiel:52, urgence:70, qualite:60, localisation:90, fiabilite:40, accessibilite:65},
+   statut:'À qualifier', commercial:null, action:'Vérifier l\'information avant affectation', collecte:'2026-08-13', maj:'2026-08-13'},
+
+  {id:'OPP-2606', titre:'Africa Development Forum — édition 2026', type:'Forum économique', secteur:'Institutionnel', organisateur:'CGEM / partenaires internationaux', ville:'Casablanca', lieu:'Casablanca Finance City', dateEv:'2026-11-04', dateLimite:'2026-09-10', source:"Sites d'événements & salons", url:'https://www.cgem.ma/africa-development-forum-2026', confiance:'Élevé',
+   emplacement:"Page événement dédiée > section « Partenaires & exposants »", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-08',
+   resume:"Forum réunissant décideurs publics et privés africains : conception scénographique, espaces networking, stands partenaires et régie technique sur 3 jours.",
+   extrait:"« La CGEM confirme la tenue de la 5e édition du forum en novembre, avec plus de 1500 participants attendus. »",
+   crit:{adequation:90, potentiel:85, urgence:58, qualite:88, localisation:95, fiabilite:88, accessibilite:60},
+   statut:'Contact à faire', commercial:'Yassine El Amrani', action:'Prendre contact avec le comité d\'organisation', collecte:'2026-08-08', maj:'2026-08-14'},
+
+  {id:'OPP-2607', titre:'Consultation mobilier événementiel — Ministère du Tourisme', type:"Appel d'offres", secteur:'Institutionnel', organisateur:'Ministère du Tourisme, de l\'Artisanat et de l\'Économie Sociale', ville:'Rabat', lieu:'Divers sites, national', dateEv:'2026-10-01', dateLimite:'2026-08-28', source:'Portail Marchés Publics', url:'https://www.marchespublics.gov.ma/consultation/08-2026', confiance:'Élevé',
+   emplacement:"Rubrique « Consultations en cours » > Avis n°08/2026", methode:'Connecteur API officiel (marchespublics.gov.ma)', datePub:'2026-08-01',
+   resume:"Fourniture et installation de mobilier événementiel premium pour les stands officiels du Maroc lors de salons touristiques internationaux (2 lots, marché-cadre 12 mois).",
+   extrait:"« Consultation n°08/2026 — marché-cadre de fourniture de mobilier événementiel, durée 12 mois, 2 lots. »",
+   crit:{adequation:94, potentiel:75, urgence:85, qualite:90, localisation:100, fiabilite:95, accessibilite:75},
+   statut:'Devis / pitch à préparer', commercial:'Nadia Chraibi', action:'Finaliser le chiffrage avant le 28 août', collecte:'2026-08-01', maj:'2026-08-15'},
+
+  {id:'OPP-2608', titre:'Festival Mawazine — stands sponsors & activations', type:'Festival / culture', secteur:'Culture', organisateur:'Association Maroc Cultures', ville:'Rabat', lieu:'Sites du festival, Rabat', dateEv:'2027-05-15', dateLimite:'2026-12-01', source:"Sites d'événements & salons", url:'https://www.mawazine.ma/candidature-sponsors', confiance:'Moyen',
+   emplacement:"Page « Devenir sponsor » de l'édition 2027", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-14',
+   resume:"Appel aux prestataires pour la conception des espaces sponsors et activations de marque sur les différentes scènes du festival.",
+   extrait:"« Les sponsors et prestataires intéressés peuvent candidater pour l\'édition 2027. »",
+   crit:{adequation:88, potentiel:65, urgence:20, qualite:70, localisation:100, fiabilite:70, accessibilite:60},
+   statut:'Nouveau', commercial:null, action:'Classer en veille — échéance lointaine', collecte:'2026-08-15', maj:'2026-08-15'},
+
+  {id:'OPP-2609', titre:'Sommet international des ONG humanitaires', type:'Congrès institutionnel', secteur:'ONG', organisateur:'Coalition ONG internationales', ville:'Marrakech', lieu:'Palais des congrès, Marrakech', dateEv:'2026-10-22', dateLimite:'2026-09-05', source:'Sites institutionnels', url:'https://www.ongsommet.org/marrakech-2026', confiance:'Moyen',
+   emplacement:"Page d'accueil > bandeau « Prochain sommet »", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-09',
+   resume:"Organisation logistique d'un sommet réunissant 40 organisations internationales : traduction, régie, signalétique multilingue et gestion des espaces de travail.",
+   extrait:"« Le sommet rassemblera plus de 40 ONG internationales autour des enjeux de développement durable. »",
+   crit:{adequation:72, potentiel:60, urgence:62, qualite:80, localisation:100, fiabilite:72, accessibilite:50},
+   statut:'À qualifier', commercial:null, action:'Identifier le point de contact logistique', collecte:'2026-08-09', maj:'2026-08-12'},
+
+  {id:'OPP-2610', titre:'Lancement produit — opérateur télécom national', type:'Événement corporate', secteur:'Corporate', organisateur:'Opérateur télécom', ville:'Casablanca', lieu:'Hôtel 5 étoiles, Casablanca', dateEv:'2026-09-25', dateLimite:'2026-08-30', source:'Presse économique', url:'https://www.medias24.com/entreprises/lancement-offre-telecom', confiance:'Élevé',
+   emplacement:"Article « Entreprises » publié le 6 août 2026", methode:'Flux RSS média', datePub:'2026-08-06',
+   resume:"Lancement d'une nouvelle offre grand public avec conférence de presse et soirée partenaires : scénographie de marque, régie audiovisuelle, hospitalité.",
+   extrait:"« L\'opérateur annonce une conférence de lancement le 25 septembre à Casablanca. »",
+   crit:{adequation:85, potentiel:78, urgence:88, qualite:85, localisation:90, fiabilite:85, accessibilite:80},
+   statut:'Contacté', commercial:'Yassine El Amrani', action:'Envoyer la proposition scénographique', collecte:'2026-08-06', maj:'2026-08-15'},
+
+  {id:'OPP-2611', titre:'Congrès médical international', type:'Congrès institutionnel', secteur:'Institutionnel', organisateur:'Société marocaine de cardiologie', ville:'Fès', lieu:'Fès Congress Center', dateEv:'2026-11-12', dateLimite:'2026-09-20', source:'Sites institutionnels', url:'https://www.fescongress.ma/12eme-edition', confiance:'Moyen',
+   emplacement:"Page « Actualités » > annonce de la 12e édition", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-13',
+   resume:"Congrès médical régional de 3 jours réunissant 800 praticiens : régie technique, signalétique, espace exposants pharmaceutiques.",
+   extrait:"« La 12e édition du congrès accueillera 800 praticiens venus de tout le pays. »",
+   crit:{adequation:70, potentiel:68, urgence:48, qualite:75, localisation:80, fiabilite:78, accessibilite:55},
+   statut:'Nouveau', commercial:null, action:'Qualifier le budget disponible', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2612', titre:"Salon de l'immobilier SMAP", type:'Salon / exposition', secteur:'Exposition', organisateur:'Fédération nationale de l\'immobilier', ville:'Casablanca', lieu:'Office des Foires, Casablanca', dateEv:'2026-10-16', dateLimite:'2026-09-01', source:'LinkedIn', url:'https://www.linkedin.com/company/smap-immo/posts', confiance:'Élevé',
+   emplacement:"Publication officielle sur la page événement, 28 juillet 2026", methode:'Connecteur API partenaire LinkedIn', datePub:'2026-07-28',
+   resume:"Salon professionnel avec plus de 80 exposants : conception de stands premium, signalétique générale, mobilier et éclairage LED.",
+   extrait:"« Plus de 80 promoteurs confirmés pour l\'édition 2026 du salon. »",
+   crit:{adequation:90, potentiel:72, urgence:65, qualite:70, localisation:90, fiabilite:85, accessibilite:78},
+   statut:'Réponse envoyée', commercial:'Nadia Chraibi', action:'Relancer avant confirmation finale', collecte:'2026-07-28', maj:'2026-08-10'},
+
+  {id:'OPP-2613', titre:'Journée portes ouvertes — banque régionale', type:'Événement corporate', secteur:'Banque', organisateur:'Banque régionale', ville:'Agadir', lieu:'Siège régional, Agadir', dateEv:'2026-09-10', dateLimite:'2026-08-20', source:'Newsletters abonnées', url:'#', confiance:'Faible',
+   emplacement:"Newsletter interne du 7 août 2026", methode:'Ingestion boîte mail autorisée', datePub:'2026-08-07',
+   resume:"Journée portes ouvertes pour le grand public à l\'occasion d\'une nouvelle agence : animation, signalétique et goodies.",
+   extrait:"« La banque ouvrira ses portes au public le 10 septembre pour présenter ses nouveaux services. »",
+   crit:{adequation:55, potentiel:35, urgence:75, qualite:55, localisation:75, fiabilite:45, accessibilite:70},
+   statut:'Non pertinent', commercial:null, action:'Budget probablement insuffisant', collecte:'2026-08-07', maj:'2026-08-09'},
+
+  {id:'OPP-2614', titre:"Gala corporate — 20 ans de l'entreprise", type:'Événement corporate', secteur:'Corporate', organisateur:'Groupe agroalimentaire', ville:'Agadir', lieu:'Hôtel Sofitel, Agadir', dateEv:'2026-12-12', dateLimite:'2026-10-30', source:'Presse économique', url:'https://www.lavieeco.com/entreprises/gala-20-ans', confiance:'Moyen',
+   emplacement:"Article « Entreprises » publié le 11 août 2026", methode:'Flux RSS média', datePub:'2026-08-11',
+   resume:"Soirée de gala pour les 20 ans du groupe : scénographie premium, spectacle, traiteur haut de gamme et régie complète.",
+   extrait:"« Le groupe prépare un événement d\'envergure pour célébrer ses deux décennies d\'activité. »",
+   crit:{adequation:92, potentiel:82, urgence:35, qualite:82, localisation:70, fiabilite:70, accessibilite:65},
+   statut:'À traiter', commercial:'Yassine El Amrani', action:'Préparer une proposition scénographique', collecte:'2026-08-11', maj:'2026-08-14'},
+
+  {id:'OPP-2615', titre:'Régie technique — Festival Gnaoua', type:'Festival / culture', secteur:'Culture', organisateur:'Association du festival', ville:'Essaouira', lieu:'Places publiques, Essaouira', dateEv:'2027-06-20', dateLimite:'2026-11-15', source:"Sites d'événements & salons", url:'https://www.festival-gnaoua.net/appel-offres-2027', confiance:'Élevé',
+   emplacement:"Page « Appel d'offres » de l'édition 2027", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-15',
+   resume:"Appel d\'offres pour la régie son, lumière et scénographie de plusieurs scènes du festival sur 4 jours.",
+   extrait:"« Consultation ouverte pour la prestation technique complète de l\'édition 2027. »",
+   crit:{adequation:96, potentiel:70, urgence:15, qualite:65, localisation:85, fiabilite:88, accessibilite:72},
+   statut:'Nouveau', commercial:null, action:'Positionner en veille — échéance lointaine', collecte:'2026-08-15', maj:'2026-08-15'},
+
+  {id:'OPP-2616', titre:'Roadshow national — constructeur automobile', type:'Activation de marque', secteur:'Corporate', organisateur:'Constructeur automobile', ville:'Marrakech', lieu:'Tournée 5 villes', dateEv:'2026-09-30', dateLimite:'2026-08-22', source:'X / Twitter', url:'#', confiance:'Faible',
+   emplacement:"Fil X du compte officiel, publication du 14 août 2026", methode:'Connecteur API X', datePub:'2026-08-14',
+   resume:"Signal faible détecté sur les réseaux évoquant une tournée promotionnelle dans 5 villes : structures mobiles, animation et démonstration produit.",
+   extrait:"« Une grande tournée nationale se prépare pour le mois de septembre. »",
+   crit:{adequation:80, potentiel:76, urgence:82, qualite:68, localisation:85, fiabilite:35, accessibilite:40},
+   statut:'À qualifier', commercial:null, action:'Confirmer l\'information avant traitement', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2617', titre:'Salon international du BTP et de la construction', type:'Salon / exposition', secteur:'Exposition', organisateur:'Fédération des BTP', ville:'Casablanca', lieu:'Office des Foires, Casablanca', dateEv:'2026-10-20', dateLimite:'2026-09-05', source:'Portails des marchés publics régionaux', url:'https://www.marchespublics.gov.ma/consultation/22-2026', confiance:'Élevé',
+   emplacement:"Rubrique « Consultations en cours » > Avis n°22/2026", methode:'Connecteur API officiel (marchespublics.gov.ma)', datePub:'2026-08-09',
+   resume:"Conception et installation de stands premium pour plus de 120 exposants du secteur BTP : mobilier, signalétique, éclairage LED et scénographie de zone VIP.",
+   extrait:"« Consultation n°22/2026 — aménagement des espaces d'exposition, surface totale 3200 m². »",
+   crit:{adequation:92, potentiel:80, urgence:60, qualite:75, localisation:90, fiabilite:90, accessibilite:70},
+   statut:'Nouveau', commercial:null, action:'Étudier le cahier des charges détaillé', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2618', titre:'Marathon international de Marrakech — activation sponsors', type:'Sport / activation marque', secteur:'Sport', organisateur:'Association du marathon de Marrakech', ville:'Marrakech', lieu:'Parcours centre-ville, Marrakech', dateEv:'2027-01-25', dateLimite:'2026-11-10', source:"Sites d'événements & salons", url:'https://www.marathon-marrakech.com/sponsors', confiance:'Moyen',
+   emplacement:"Page « Devenir partenaire » de l'édition 2027", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-12',
+   resume:"Structures de départ/arrivée, zones de ravitaillement scénographiées, arches sponsors et signalétique de parcours pour 15 000 coureurs attendus.",
+   extrait:"« L'organisation recherche des partenaires techniques pour l'édition 2027 du marathon. »",
+   crit:{adequation:85, potentiel:70, urgence:25, qualite:72, localisation:85, fiabilite:68, accessibilite:58},
+   statut:'À qualifier', commercial:null, action:'Positionner en veille — échéance lointaine', collecte:'2026-08-12', maj:'2026-08-14'},
+
+  {id:'OPP-2619', titre:'Forum de l\'investissement Maroc-Afrique', type:'Forum économique', secteur:'Institutionnel', organisateur:'Ministère de l\'Investissement', ville:'Rabat', lieu:'Skhirat — Centre de conférences', dateEv:'2026-11-18', dateLimite:'2026-09-25', source:'Sites institutionnels', url:'https://www.finances.gov.ma/forum-investissement-2026', confiance:'Élevé',
+   emplacement:"Page « Actualités » du ministère, communiqué du 11 août", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-11',
+   resume:"Forum diplomatique et économique réunissant 30 délégations africaines : régie technique, cabines de traduction, scénographie institutionnelle et espace networking.",
+   extrait:"« Le forum réunira plus de 30 délégations autour des enjeux d'investissement en Afrique. »",
+   crit:{adequation:84, potentiel:86, urgence:52, qualite:95, localisation:100, fiabilite:90, accessibilite:50},
+   statut:'À qualifier', commercial:null, action:'Contacter le protocole ministériel', collecte:'2026-08-11', maj:'2026-08-13'},
+
+  {id:'OPP-2620', titre:'Consultation aménagement stand — Salon international de la santé (SIHS)', type:"Appel d'offres", secteur:'Santé', organisateur:'Ministère de la Santé', ville:'Casablanca', lieu:'Centre international de conférences, Casablanca', dateEv:'2026-10-25', dateLimite:'2026-09-02', source:'Portail Marchés Publics', url:'https://www.marchespublics.gov.ma/consultation/19-2026', confiance:'Élevé',
+   emplacement:"Rubrique « Consultations en cours » > Avis n°19/2026", methode:'Connecteur API officiel (marchespublics.gov.ma)', datePub:'2026-08-07',
+   resume:"Fourniture et installation du stand institutionnel du Ministère de la Santé, incluant signalétique sanitaire et espace de démonstration d'équipements médicaux.",
+   extrait:"« Avis n°19/2026 — aménagement du pavillon institutionnel de la santé, surface 200 m². »",
+   crit:{adequation:88, potentiel:65, urgence:72, qualite:88, localisation:90, fiabilite:92, accessibilite:68},
+   statut:'À traiter', commercial:'Salma Idrissi', action:'Préparer le dossier technique et financier', collecte:'2026-08-07', maj:'2026-08-14'},
+
+  {id:'OPP-2621', titre:'Lancement d\'une filiale bancaire digitale', type:'Événement corporate', secteur:'Banque', organisateur:'Groupe bancaire national', ville:'Casablanca', lieu:'Casablanca Finance City', dateEv:'2026-10-05', dateLimite:'2026-09-08', source:'LinkedIn', url:'https://www.linkedin.com/company/banque-digitale/posts', confiance:'Moyen',
+   emplacement:"Publication corporate sur la page entreprise, 9 août 2026", methode:'Connecteur API partenaire LinkedIn', datePub:'2026-08-09',
+   resume:"Conférence de lancement d'une offre bancaire 100% digitale : scénographie technologique, écrans interactifs, régie audiovisuelle et cocktail partenaires.",
+   extrait:"« La banque prépare le lancement officiel de sa filiale digitale pour le mois d'octobre. »",
+   crit:{adequation:80, potentiel:75, urgence:65, qualite:88, localisation:90, fiabilite:70, accessibilite:62},
+   statut:'Nouveau', commercial:null, action:'Qualifier le budget événementiel', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2622', titre:'Congrès international de l\'éducation et de l\'innovation pédagogique', type:'Congrès institutionnel', secteur:'Éducation', organisateur:'Université euro-méditerranéenne', ville:'Fès', lieu:'Campus universitaire, Fès', dateEv:'2026-11-28', dateLimite:'2026-10-01', source:'Sites institutionnels', url:'https://www.ueuromed.org/congres-education-2026', confiance:'Moyen',
+   emplacement:"Page « Événements » de l'université, annonce du 13 août", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-13',
+   resume:"Congrès académique international de 3 jours : régie technique, signalétique multilingue, espace posters et zone networking pour 500 chercheurs.",
+   extrait:"« Le congrès rassemblera plus de 500 chercheurs et pédagogues venus de 20 pays. »",
+   crit:{adequation:66, potentiel:58, urgence:40, qualite:70, localisation:75, fiabilite:75, accessibilite:52},
+   statut:'À qualifier', commercial:null, action:'Évaluer le budget disponible côté université', collecte:'2026-08-13', maj:'2026-08-14'},
+
+  {id:'OPP-2623', titre:'Activation marque — Tournoi international de golf', type:'Sport / activation marque', secteur:'Sport', organisateur:'Royal Golf Club', ville:'Agadir', lieu:'Golf du Soleil, Agadir', dateEv:'2026-12-14', dateLimite:'2026-10-20', source:"Sites d'événements & salons", url:'https://www.royalgolfclub.ma/tournoi-international', confiance:'Élevé',
+   emplacement:"Page « Partenaires » du tournoi 2026", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-10',
+   resume:"Structures d'accueil VIP, tentes de réception, signalétique de parcours et espace sponsors pour un tournoi international réunissant 200 joueurs.",
+   extrait:"« Le Royal Golf Club recherche des partenaires officiels pour l'édition 2026. »",
+   crit:{adequation:82, potentiel:68, urgence:38, qualite:80, localisation:70, fiabilite:82, accessibilite:66},
+   statut:'À qualifier', commercial:null, action:'Prendre contact avec le comité d\'organisation', collecte:'2026-08-10', maj:'2026-08-12'},
+
+  {id:'OPP-2624', titre:'Appel d\'offres signalétique — Aéroport Ibn Battouta', type:"Appel d'offres", secteur:'Institutionnel', organisateur:'Office National des Aéroports (ONDA)', ville:'Tanger', lieu:'Aéroport Ibn Battouta, Tanger', dateEv:'2026-12-01', dateLimite:'2026-09-15', source:'Bulletins officiels des marchés publics (BOMP)', url:'https://www.onda.ma/marches/signaletique-tanger', confiance:'Élevé',
+   emplacement:"Bulletin officiel, avis n°31/2026", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-04',
+   resume:"Refonte complète de la signalétique intérieure et extérieure de l'aérogare : fabrication, pose et maintenance sur 18 mois.",
+   extrait:"« Avis n°31/2026 — marché de signalétique aéroportuaire, durée 18 mois. »",
+   crit:{adequation:78, potentiel:82, urgence:68, qualite:90, localisation:80, fiabilite:92, accessibilite:60},
+   statut:'À traiter', commercial:'Hamza Benjelloun', action:'Constituer le dossier de candidature', collecte:'2026-08-04', maj:'2026-08-15'},
+
+  {id:'OPP-2625', titre:'Salon Solaire Expo — énergies renouvelables', type:'Salon / exposition', secteur:'Énergie', organisateur:'Cluster Solaire Maroc', ville:'Marrakech', lieu:'Palais des Congrès, Marrakech', dateEv:'2026-11-09', dateLimite:'2026-09-18', source:'Plateformes sectorielles BTP & construction', url:'https://www.clustersolaire.ma/salon-2026', confiance:'Moyen',
+   emplacement:"Page événement > section « Exposants et prestataires »", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-06',
+   resume:"Stands techniques pour 60 exposants du secteur des énergies renouvelables : mobilier, signalétique technique et espace démonstration.",
+   extrait:"« Plus de 60 entreprises du secteur solaire ont confirmé leur participation. »",
+   crit:{adequation:80, potentiel:66, urgence:55, qualite:68, localisation:95, fiabilite:70, accessibilite:64},
+   statut:'Nouveau', commercial:null, action:'Qualifier le nombre d\'exposants confirmés', collecte:'2026-08-15', maj:'2026-08-15'},
+
+  {id:'OPP-2626', titre:'Sommet des maires africains', type:'Congrès institutionnel', secteur:'Institutionnel', organisateur:'Association marocaine des présidents de conseils communaux', ville:'Oujda', lieu:'Palais des congrès, Oujda', dateEv:'2026-12-08', dateLimite:'2026-10-12', source:'Sites institutionnels', url:'https://www.ampcc.ma/sommet-maires-2026', confiance:'Moyen',
+   emplacement:"Page « Actualités » de l'association, communiqué du 8 août", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-08',
+   resume:"Sommet réunissant 200 élus locaux africains : traduction simultanée, régie, signalétique institutionnelle et gestion des délégations officielles.",
+   extrait:"« Le sommet rassemblera 200 élus locaux venus de 25 pays africains. »",
+   crit:{adequation:70, potentiel:62, urgence:45, qualite:82, localisation:55, fiabilite:72, accessibilite:48},
+   statut:'À qualifier', commercial:null, action:'Identifier le comité d\'organisation local', collecte:'2026-08-08', maj:'2026-08-11'},
+
+  {id:'OPP-2627', titre:'Campagne de sensibilisation santé publique', type:'Activation de marque', secteur:'ONG', organisateur:'ONG internationale de santé', ville:'Kénitra', lieu:'Places publiques, région de Kénitra', dateEv:'2026-09-22', dateLimite:'2026-08-29', source:'Newsletters abonnées', url:'#', confiance:'Faible',
+   emplacement:"Newsletter partenaires, édition du 9 août 2026", methode:'Ingestion boîte mail autorisée', datePub:'2026-08-09',
+   resume:"Structures mobiles de sensibilisation, signalétique pédagogique et logistique pour une tournée de campagnes de santé publique dans 4 villes.",
+   extrait:"« L'ONG lance une tournée de sensibilisation dans 4 villes du Nord-Ouest. »",
+   crit:{adequation:58, potentiel:40, urgence:68, qualite:55, localisation:60, fiabilite:50, accessibilite:55},
+   statut:'À qualifier', commercial:null, action:'Vérifier le budget disponible côté ONG', collecte:'2026-08-09', maj:'2026-08-10'},
+
+  {id:'OPP-2628', titre:'Inauguration d\'un centre commercial régional', type:'Événement corporate', secteur:'Corporate', organisateur:'Groupe immobilier commercial', ville:'El Jadida', lieu:'Nouveau centre commercial, El Jadida', dateEv:'2026-11-15', dateLimite:'2026-10-01', source:'Presse économique', url:'https://www.leseco.ma/entreprises/inauguration-centre-jadida', confiance:'Moyen',
+   emplacement:"Article « Entreprises » publié le 12 août 2026", methode:'Flux RSS média', datePub:'2026-08-12',
+   resume:"Cérémonie d'inauguration grand public : scénographie d'entrée, animation, spectacle et régie technique pour un centre commercial de 25 000 m².",
+   extrait:"« Le groupe annonce l'ouverture de son nouveau centre commercial pour novembre. »",
+   crit:{adequation:76, potentiel:60, urgence:42, qualite:65, localisation:50, fiabilite:68, accessibilite:58},
+   statut:'Nouveau', commercial:null, action:'Qualifier le budget d\'inauguration', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2629', titre:'Festival international du film de Marrakech — espaces partenaires', type:'Festival / culture', secteur:'Culture', organisateur:'Fondation du Festival du Film de Marrakech', ville:'Marrakech', lieu:'Palais des Congrès, Marrakech', dateEv:'2026-12-03', dateLimite:'2026-10-05', source:"Sites d'événements & salons", url:'https://www.fifm.ma/partenaires-2026', confiance:'Élevé',
+   emplacement:"Page « Devenir partenaire » de l'édition 2026", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-05',
+   resume:"Espaces lounge partenaires, tapis rouge, signalétique premium et régie technique pour l'un des plus grands événements culturels du pays.",
+   extrait:"« La Fondation ouvre les candidatures pour les espaces partenaires de l'édition 2026. »",
+   crit:{adequation:90, potentiel:84, urgence:48, qualite:85, localisation:100, fiabilite:88, accessibilite:55},
+   statut:'À qualifier', commercial:null, action:'Préparer une proposition premium', collecte:'2026-08-05', maj:'2026-08-09'},
+
+  {id:'OPP-2630', titre:'Consultation mobilier hôtelier — chaîne hôtelière internationale', type:"Appel d'offres", secteur:'Corporate', organisateur:'Chaîne hôtelière internationale', ville:'Tanger', lieu:'Nouvel hôtel, Tanger', dateEv:'2026-10-30', dateLimite:'2026-09-10', source:'Plateformes sectorielles BTP & construction', url:'https://www.hospitality-morocco.com/appel-offres-tanger', confiance:'Moyen',
+   emplacement:"Page « Appels d'offres » de la plateforme, publiée le 3 août", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-03',
+   resume:"Fourniture de mobilier premium pour les espaces communs d'un nouvel établissement hôtelier 5 étoiles : lobby, restaurant et salles de réunion.",
+   extrait:"« Consultation pour l'ameublement complet des espaces communs du nouvel hôtel. »",
+   crit:{adequation:88, potentiel:72, urgence:58, qualite:78, localisation:80, fiabilite:74, accessibilite:62},
+   statut:'À qualifier', commercial:null, action:'Demander le cahier des charges complet', collecte:'2026-08-03', maj:'2026-08-08'},
+
+  {id:'OPP-2631', titre:'Congrès annuel des notaires du Maroc', type:'Congrès institutionnel', secteur:'Institutionnel', organisateur:'Conseil National de l\'Ordre des Notaires', ville:'Rabat', lieu:'Hôtel Sheraton, Rabat', dateEv:'2026-11-06', dateLimite:'2026-09-22', source:'Sites institutionnels', url:'https://www.notaires.ma/congres-annuel-2026', confiance:'Élevé',
+   emplacement:"Page « Actualités » de l'Ordre, communiqué du 14 août", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-14',
+   resume:"Congrès professionnel réunissant 400 notaires : régie technique, signalétique, espace networking et soirée de gala.",
+   extrait:"« Le congrès annuel réunira plus de 400 notaires venus de tout le royaume. »",
+   crit:{adequation:75, potentiel:64, urgence:50, qualite:80, localisation:100, fiabilite:85, accessibilite:58},
+   statut:'Nouveau', commercial:null, action:'Identifier le comité d\'organisation', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2632', titre:'Roadshow bancaire régional — nouvelle offre PME', type:'Activation de marque', secteur:'Banque', organisateur:'Banque régionale', ville:'Nador', lieu:'Tournée 3 villes du Nord-Est', dateEv:'2026-09-28', dateLimite:'2026-08-24', source:'X / Twitter', url:'#', confiance:'Faible',
+   emplacement:"Fil X du compte régional, publication du 15 août 2026", methode:'Connecteur API X', datePub:'2026-08-15',
+   resume:"Signal détecté évoquant une tournée promotionnelle dans le Nord-Est pour une nouvelle offre PME : structures mobiles, animation commerciale.",
+   extrait:"« Notre équipe se déplace dans 3 villes pour présenter la nouvelle offre PME. »",
+   crit:{adequation:65, potentiel:48, urgence:78, qualite:58, localisation:45, fiabilite:38, accessibilite:50},
+   statut:'À qualifier', commercial:null, action:'Confirmer l\'information avant traitement', collecte:'2026-08-15', maj:'2026-08-15'},
+
+  {id:'OPP-2633', titre:'Salon national de l\'artisanat', type:'Salon / exposition', secteur:'Culture', organisateur:'Chambre d\'artisanat de Safi', ville:'Safi', lieu:'Complexe artisanal, Safi', dateEv:'2026-10-12', dateLimite:'2026-09-01', source:'Chambres de commerce et d\'industrie (CCI)', url:'https://www.cci-safi.ma/salon-artisanat-2026', confiance:'Moyen',
+   emplacement:"Page « Événements » de la CCI, annonce du 2 août", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-02',
+   resume:"Aménagement de 150 stands artisanaux : mobilier modulaire, signalétique et éclairage adapté aux productions locales.",
+   extrait:"« Le salon accueillera plus de 150 artisans de la région. »",
+   crit:{adequation:70, potentiel:42, urgence:60, qualite:50, localisation:35, fiabilite:65, accessibilite:60},
+   statut:'À qualifier', commercial:null, action:'Évaluer la rentabilité du dossier', collecte:'2026-08-02', maj:'2026-08-07'},
+
+  {id:'OPP-2634', titre:'Sommet national énergie et mines', type:'Congrès institutionnel', secteur:'Énergie', organisateur:'Ministère de la Transition Énergétique', ville:'Laâyoune', lieu:'Centre de conférences, Laâyoune', dateEv:'2026-12-16', dateLimite:'2026-10-25', source:'Sites institutionnels', url:'https://www.mem.gov.ma/sommet-energie-2026', confiance:'Élevé',
+   emplacement:"Page « Actualités » du ministère, communiqué du 15 août", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-15',
+   resume:"Sommet stratégique sur les énergies renouvelables dans les provinces du Sud : régie technique, scénographie institutionnelle et espace exposants.",
+   extrait:"« Le sommet mettra l'accent sur les projets d'énergie renouvelable dans les provinces du Sud. »",
+   crit:{adequation:78, potentiel:80, urgence:35, qualite:88, localisation:35, fiabilite:88, accessibilite:45},
+   statut:'Nouveau', commercial:null, action:'Positionner en veille — échéance lointaine', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2635', titre:'Activation marque — Coupe du Trône', type:'Sport / activation marque', secteur:'Sport', organisateur:'Fédération Royale Marocaine de Football', ville:'Béni Mellal', lieu:'Stade municipal, Béni Mellal', dateEv:'2026-10-18', dateLimite:'2026-09-12', source:"Sites d'événements & salons", url:'https://www.frmf.ma/coupe-trone-partenaires', confiance:'Moyen',
+   emplacement:"Page « Partenariats » de la fédération, publiée le 7 août", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-07',
+   resume:"Structures d'accueil VIP, signalétique de stade et animations d'avant-match pour la finale régionale de la Coupe du Trône.",
+   extrait:"« La fédération ouvre les candidatures pour les partenariats de la Coupe du Trône. »",
+   crit:{adequation:82, potentiel:58, urgence:62, qualite:65, localisation:30, fiabilite:75, accessibilite:55},
+   statut:'À qualifier', commercial:null, action:'Évaluer le potentiel de visibilité régional', collecte:'2026-08-07', maj:'2026-08-10'},
+
+  {id:'OPP-2636', titre:'Forum universitaire international', type:'Forum économique', secteur:'Éducation', organisateur:'Université Abdelmalek Essaâdi', ville:'Tétouan', lieu:'Campus universitaire, Tétouan', dateEv:'2026-11-21', dateLimite:'2026-09-28', source:'Sites institutionnels', url:'https://www.uae.ac.ma/forum-international-2026', confiance:'Moyen',
+   emplacement:"Page « Événements » de l'université, annonce du 10 août", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-10',
+   resume:"Forum académique international avec exposants et partenaires industriels : régie, signalétique et espace exposition sur 2 jours.",
+   extrait:"« Le forum accueillera des délégations universitaires de 15 pays. »",
+   crit:{adequation:62, potentiel:50, urgence:45, qualite:62, localisation:40, fiabilite:70, accessibilite:48},
+   statut:'À qualifier', commercial:null, action:'Évaluer le budget disponible côté université', collecte:'2026-08-10', maj:'2026-08-12'},
+
+  {id:'OPP-2637', titre:'Lancement d\'un nouveau produit pharmaceutique', type:'Événement corporate', secteur:'Santé', organisateur:'Laboratoire pharmaceutique national', ville:'Casablanca', lieu:'Hôtel 5 étoiles, Casablanca', dateEv:'2026-10-09', dateLimite:'2026-09-05', source:'Plateformes sectorielles santé & pharma', url:'https://www.pharmamaroc.com/lancement-produit', confiance:'Moyen',
+   emplacement:"Page « Actualités » de la plateforme sectorielle, publiée le 8 août", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-08',
+   resume:"Conférence de lancement destinée aux professionnels de santé : scénographie de marque, régie audiovisuelle et espace démonstration produit.",
+   extrait:"« Le laboratoire annonce le lancement de son nouveau produit auprès des professionnels de santé. »",
+   crit:{adequation:74, potentiel:68, urgence:60, qualite:78, localisation:90, fiabilite:70, accessibilite:60},
+   statut:'À qualifier', commercial:null, action:'Identifier le contact marketing du laboratoire', collecte:'2026-08-08', maj:'2026-08-13'},
+
+  {id:'OPP-2638', titre:'Consultation régie technique — Festival Timitar', type:"Appel d'offres", secteur:'Culture', organisateur:'Association du festival Timitar', ville:'Agadir', lieu:'Places publiques, Agadir', dateEv:'2027-07-08', dateLimite:'2026-12-10', source:"Sites d'événements & salons", url:'https://www.timitar.ma/appel-offres-2027', confiance:'Élevé',
+   emplacement:"Page « Appel d'offres » de l'édition 2027", methode:'Scraping conforme (fréquence hebdomadaire)', datePub:'2026-08-14',
+   resume:"Prestation technique complète pour plusieurs scènes du festival : son, lumière et scénographie sur 5 jours.",
+   extrait:"« Consultation ouverte pour la régie technique complète de l'édition 2027. »",
+   crit:{adequation:94, potentiel:66, urgence:12, qualite:62, localisation:70, fiabilite:85, accessibilite:68},
+   statut:'Nouveau', commercial:null, action:'Positionner en veille — échéance très lointaine', collecte:'2026-08-16', maj:'2026-08-16'},
+
+  {id:'OPP-2639', titre:'Sommet ONG environnement et développement durable', type:'Congrès institutionnel', secteur:'ONG', organisateur:'Coalition ONG environnementales', ville:'Dakhla', lieu:'Centre de conférences, Dakhla', dateEv:'2026-12-02', dateLimite:'2026-10-08', source:'Sites institutionnels', url:'https://www.ongenvironnement.org/sommet-dakhla', confiance:'Faible',
+   emplacement:"Page d'accueil > bandeau annonce, 6 août 2026", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-06',
+   resume:"Sommet régional sur le développement durable dans les provinces du Sud : traduction, régie et signalétique multilingue.",
+   extrait:"« Le sommet rassemblera des ONG environnementales autour du développement durable. »",
+   crit:{adequation:60, potentiel:45, urgence:40, qualite:60, localisation:15, fiabilite:48, accessibilite:35},
+   statut:'À qualifier', commercial:null, action:'Vérifier la fiabilité de la source avant traitement', collecte:'2026-08-06', maj:'2026-08-09'},
+
+  {id:'OPP-2640', titre:'Congrès annuel des assureurs marocains', type:'Congrès institutionnel', secteur:'Banque', organisateur:'Fédération Marocaine des Sociétés d\'Assurances', ville:'Marrakech', lieu:'Palais des Congrès, Marrakech', dateEv:'2026-11-25', dateLimite:'2026-09-30', source:'Sites institutionnels', url:'https://www.fmsar.ma/congres-annuel-2026', confiance:'Élevé',
+   emplacement:"Page « Actualités » de la fédération, communiqué du 13 août", methode:'Scraping conforme (fréquence quotidienne)', datePub:'2026-08-13',
+   resume:"Congrès professionnel réunissant 350 acteurs du secteur des assurances : régie technique, scénographie institutionnelle et soirée de gala.",
+   extrait:"« Le congrès annuel de la FMSAR réunira plus de 350 professionnels du secteur. »",
+   crit:{adequation:78, potentiel:74, urgence:48, qualite:85, localisation:95, fiabilite:88, accessibilite:56},
+   statut:'Nouveau', commercial:null, action:'Identifier le contact organisateur', collecte:'2026-08-16', maj:'2026-08-16'},
+];
+
+/* =========================================================
+   MOTEUR DE SCORING
+   ========================================================= */
+function computeScore(o){ let s=0; for(const k in WEIGHTS){ s += (o.crit[k]*WEIGHTS[k]/100); } return Math.round(s); }
+function computePriority(score){ if(score>=THRESH.A) return 'A'; if(score>=THRESH.B) return 'B'; if(score>=THRESH.C) return 'C'; return 'R'; }
+function priorityLabel(p){ return {A:'Priorité A',B:'Priorité B',C:'Priorité C',R:'Veille passive'}[p]; }
+function priorityColorVar(p){ return {A:'--pA',B:'--pB',C:'--pC',R:'--pR'}[p]; }
+function enrich(o){ const score=computeScore(o); const priorite=computePriority(score); return Object.assign({},o,{score,priorite}); }
+function getData(){ return RAW.map(enrich); }
+
+/* =========================================================
+   STATE
+   ========================================================= */
+let STATE = {
+  view:'dashboard', previousView:'dashboard', detailId:null,
+  search:'', oppMiniSearch:'',
+  filters:{secteur:'', ville:'', type:'', statut:'', priorite:'', scoreMin:0},
+  oppSort:{col:'score', dir:'desc'}, oppPage:1, oppPerPage:10,
+  userSort:{col:'nom', dir:'asc'},
+  sourceSearch:'', sourcePage:1, sourcePerPage:9,
+  reportTab:'daily', comments:{},
+};
+
+function toast(msg){
+  const w = document.getElementById('toastWrap');
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  w.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 3200);
+}
+function fmtDate(d){ const dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}); }
+function fmtDateFull(d){ const dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}); }
+function daysUntil(d){ const dt=new Date(d+'T00:00:00'), now=new Date('2026-08-16T00:00:00'); return Math.round((dt-now)/86400000); }
+function initials(name){ return name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    if(el.dataset.rep){ STATE.reportTab = el.dataset.rep; syncReportTabs(); }
+    switchView(el.dataset.view);
+  });
+});
+document.querySelectorAll('[data-goto]').forEach(el=> el.addEventListener('click', e=>{ e.preventDefault(); switchView(el.dataset.goto); }));
+
+function switchView(name){
+  if(STATE.view!=='detail') STATE.previousView = STATE.view;
+  STATE.view = name;
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+    const match = el.dataset.view===name && (!el.dataset.rep || el.dataset.rep===STATE.reportTab);
+    el.classList.toggle('active', name==='reports' ? (el.dataset.view==='reports' && el.dataset.rep===STATE.reportTab) : el.dataset.view===name);
+  });
+  document.querySelectorAll('.view').forEach(el=> el.classList.toggle('active', el.id==='view-'+name));
+  document.getElementById('sidebar').classList.remove('open');
+  renderAll();
+}
+document.getElementById('hamburgerBtn').addEventListener('click', ()=> document.getElementById('sidebar').classList.toggle('open'));
+
+/* opportunities sub-nav presets */
+document.querySelectorAll('#oppSubnav a').forEach(a=>{
+  a.addEventListener('click', e=>{
+    e.preventDefault();
+    applyPreset(a.dataset.preset);
+    document.querySelectorAll('#oppSubnav a').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active');
+    switchView('opportunities');
+  });
+});
+function applyPreset(preset){
+  STATE.filters = {secteur:'', ville:'', type:'', statut:'', priorite:'', scoreMin:0};
+  STATE.oppMiniSearch=''; STATE.oppPage=1;
+  if(preset==='A') STATE.filters.priorite='A';
+  if(preset==='qualif') STATE.filters.statut='À qualifier';
+  if(preset==='cours'){ STATE.filters._custom='cours'; } else if(preset==='archive'){ STATE.filters._custom='archive'; } else { STATE.filters._custom=null; }
+}
+
+/* ============ DASHBOARD ============ */
+function renderKPIs(data){
+  const total=data.length;
+  const nouvelles = data.filter(o=>o.collecte>='2026-08-15').length;
+  const pA = data.filter(o=>o.priorite==='A').length;
+  const enCours = data.filter(o=>!['Gagné','Perdu','Archivé','Non pertinent'].includes(o.statut)).length;
+  const cards=[
+    {label:'Opportunités actives', value:total, delta:`+${nouvelles} nouvelles / 24h`, cls:'up', icon:'op', tile:'tile-violet'},
+    {label:'Priorité A', value:pA, delta:'Action commerciale requise', cls:'warn', icon:'flag', tile:'tile-amber'},
+    {label:'Score moyen', value:Math.round(data.reduce((a,o)=>a+o.score,0)/total), delta:'Sur '+total+' opportunités qualifiées', cls:'', icon:'gauge', tile:'tile-teal'},
+    {label:'En cours de traitement', value:enCours, delta:'Du contact à la réponse envoyée', cls:'', icon:'clock', tile:'tile-violet'},
+  ];
+  const icons={op:'<path d="M4 6h16M4 12h16M4 18h10"/>', flag:'<path d="M5 21V4M5 4h13l-3 4 3 4H5"/>', gauge:'<path d="M12 21a9 9 0 100-18 9 9 0 000 18z"/><path d="M12 12l3-3"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>'};
+  document.getElementById('kpiRow').innerHTML = cards.map(c=>`
+    <div class="kpi-card">
+      <div class="top-row"><div class="ico ${c.tile}" style="color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icons[c.icon]}</svg></div></div>
+      <div class="label">${c.label}</div><div class="value">${c.value}</div><div class="delta ${c.cls}">${c.delta}</div>
+    </div>`).join('');
+}
+function renderRadar(data){
+  const g=document.getElementById('radarBlips');
+  const top=[...data].sort((a,b)=>b.score-a.score).slice(0,12);
+  const cx=150, cy=150, maxR=138; let html='';
+  top.forEach(o=>{
+    const urgencyAngle=(100-o.crit.urgence)/100*340-90; const rad=(urgencyAngle*Math.PI)/180;
+    const dist=maxR*(1-o.score/110);
+    const x=cx+dist*Math.cos(rad), y=cy+dist*Math.sin(rad);
+    const color=`var(${priorityColorVar(o.priorite)})`;
+    html+=`<g class="blip" data-id="${o.id}" transform="translate(${x.toFixed(1)},${y.toFixed(1)})"><circle class="blip-pulse" r="4" fill="${color}"/><circle class="core" r="4.5" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/></g>`;
+  });
+  g.innerHTML=html;
+  g.querySelectorAll('.blip').forEach(b=> b.addEventListener('click', ()=> openDetail(b.dataset.id)));
+}
+function renderSectorBars(data){
+  const by={}; data.forEach(o=> by[o.secteur]=(by[o.secteur]||0)+1);
+  const max=Math.max(...Object.values(by));
+  document.getElementById('sectorBars').innerHTML = Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`
+    <div class="sector-bar-row"><span class="name">${n}</span><div class="sector-bar-track"><div class="sector-bar-fill" style="width:${(c/max*100).toFixed(0)}%"></div></div><span class="num">${c}</span></div>`).join('');
+}
+function oppRowHtml(o, cols){
+  const color=`var(${priorityColorVar(o.priorite)})`; let cells='';
+  cols.forEach(c=>{
+    if(c==='titre') cells+=`<td><div class="opp-title-cell"><b>${o.titre}</b><span>${o.organisateur}</span></div></td>`;
+    else if(c==='secteur') cells+=`<td>${o.secteur}</td>`;
+    else if(c==='ville') cells+=`<td>${o.ville}</td>`;
+    else if(c==='source') cells+=`<td style="color:var(--text-faint);font-size:12px;">${o.source}</td>`;
+    else if(c==='score') cells+=`<td><div class="score-cell"><b>${o.score}</b><div class="mini-track"><div class="mini-fill" style="width:${o.score}%;background:${color}"></div></div></div></td>`;
+    else if(c==='priorite') cells+=`<td><span class="badge badge-${o.priorite}"><span class="badge-dot"></span>${priorityLabel(o.priorite)}</span></td>`;
+    else if(c==='statut') cells+=`<td><span class="status-pill">${o.statut}</span></td>`;
+    else if(c==='deadline'){ const d=daysUntil(o.dateLimite); cells+=`<td class="mono" style="font-size:12px;color:${d<=7?'var(--pA)':'var(--text-dim)'}">${fmtDate(o.dateLimite)} ${d>=0?'· J-'+d:''}</td>`; }
+    else if(c==='affecte') cells+=`<td style="font-size:12px;color:var(--text-dim)">${o.commercial||'—'}</td>`;
+    else if(c==='chev') cells+=`<td class="chev-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></td>`;
+  });
+  return `<tr data-id="${o.id}">${cells}</tr>`;
+}
+function attachRowClicks(tbody){ tbody.querySelectorAll('tr[data-id]').forEach(tr=> tr.addEventListener('click', ()=> openDetail(tr.dataset.id))); }
+function renderDashboardTable(data){
+  const top=[...data].sort((a,b)=>b.score-a.score).slice(0,6);
+  const tbody=document.getElementById('dashTableBody');
+  tbody.innerHTML = top.map(o=>oppRowHtml(o,['titre','secteur','ville','score','priorite','statut','deadline','chev'])).join('');
+  attachRowClicks(tbody);
+}
+
+/* ============ OPPORTUNITIES LIST ============ */
+function populateFilterOptions(data){
+  const sel=(id,values)=>{ const el=document.getElementById(id); const cur=el.value; el.innerHTML=el.options[0].outerHTML+values.map(v=>`<option value="${v}">${v}</option>`).join(''); el.value=cur; };
+  sel('fSecteur',[...new Set(data.map(o=>o.secteur))].sort());
+  sel('fVille',[...new Set(data.map(o=>o.ville))].sort());
+  sel('fType',[...new Set(data.map(o=>o.type))].sort());
+  sel('fStatut',STATUTS);
+}
+function filteredData(){
+  let data=getData(); const f=STATE.filters, q=STATE.search.toLowerCase().trim(), q2=STATE.oppMiniSearch.toLowerCase().trim();
+  if(q) data=data.filter(o=>(o.titre+' '+o.organisateur+' '+o.ville+' '+o.secteur+' '+o.type).toLowerCase().includes(q));
+  if(q2) data=data.filter(o=>(o.titre+' '+o.organisateur+' '+o.ville+' '+o.secteur+' '+o.type+' '+o.statut).toLowerCase().includes(q2));
+  if(f.secteur) data=data.filter(o=>o.secteur===f.secteur);
+  if(f.ville) data=data.filter(o=>o.ville===f.ville);
+  if(f.type) data=data.filter(o=>o.type===f.type);
+  if(f.statut) data=data.filter(o=>o.statut===f.statut);
+  if(f.priorite) data=data.filter(o=>o.priorite===f.priorite);
+  if(f.scoreMin) data=data.filter(o=>o.score>=f.scoreMin);
+  if(f._custom==='cours') data=data.filter(o=>!['Gagné','Perdu','Archivé','Non pertinent','Nouveau'].includes(o.statut));
+  if(f._custom==='archive') data=data.filter(o=>['Gagné','Perdu','Archivé','Non pertinent'].includes(o.statut));
+  const {col,dir}=STATE.oppSort;
+  data.sort((a,b)=>{
+    let av=a[col], bv=b[col];
+    if(typeof av==='string'){ av=av.toLowerCase(); bv=bv.toLowerCase(); }
+    if(av<bv) return dir==='asc'?-1:1; if(av>bv) return dir==='asc'?1:-1; return 0;
+  });
+  return data;
+}
+function renderOpportunities(){
+  const all = filteredData();
+  document.getElementById('resultsCount').textContent = `${all.length} opportunité${all.length>1?'s':''}`;
+  const totalPages = Math.max(1, Math.ceil(all.length/STATE.oppPerPage));
+  if(STATE.oppPage>totalPages) STATE.oppPage=totalPages;
+  const start=(STATE.oppPage-1)*STATE.oppPerPage;
+  const page = all.slice(start, start+STATE.oppPerPage);
+  const tbody=document.getElementById('oppTableBody');
+  if(page.length===0){ tbody.innerHTML=`<tr class="empty-row"><td colspan="9">Aucune opportunité ne correspond à ces filtres.</td></tr>`; }
+  else{ tbody.innerHTML = page.map(o=>oppRowHtml(o,['titre','secteur','ville','source','score','priorite','statut','affecte','chev'])).join(''); attachRowClicks(tbody); }
+  document.querySelectorAll('#view-opportunities thead th[data-sort]').forEach(th=>{
+    const arrow = th.querySelector('.arrow');
+    arrow.textContent = STATE.oppSort.col===th.dataset.sort ? (STATE.oppSort.dir==='asc'?'▲':'▼') : '';
+  });
+  renderPagination('oppPagination', STATE.oppPage, totalPages, p=>{ STATE.oppPage=p; renderOpportunities(); });
+}
+function renderPagination(elId, page, totalPages, onGo){
+  const el=document.getElementById(elId);
+  let btns='';
+  const maxShow=5;
+  let startP=Math.max(1,page-2), endP=Math.min(totalPages,startP+maxShow-1);
+  startP=Math.max(1,endP-maxShow+1);
+  for(let p=startP;p<=endP;p++) btns+=`<button class="pg-btn ${p===page?'active':''}" data-p="${p}">${p}</button>`;
+  el.innerHTML = `<span>Page ${page} / ${totalPages}</span><div class="pg-btns">
+    <button class="pg-btn" data-p="${page-1}" ${page<=1?'disabled':''}>‹</button>
+    ${btns}
+    <button class="pg-btn" data-p="${page+1}" ${page>=totalPages?'disabled':''}>›</button></div>`;
+  el.querySelectorAll('.pg-btn[data-p]').forEach(b=> b.addEventListener('click', ()=> onGo(+b.dataset.p)));
+}
+document.querySelectorAll('#view-opportunities thead th[data-sort]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const col=th.dataset.sort;
+    if(STATE.oppSort.col===col) STATE.oppSort.dir = STATE.oppSort.dir==='asc'?'desc':'asc';
+    else STATE.oppSort={col,dir:'desc'};
+    renderOpportunities();
+  });
+});
+['fSecteur','fVille','fType','fStatut'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', e=>{
+    const map={fSecteur:'secteur',fVille:'ville',fType:'type',fStatut:'statut'};
+    STATE.filters[map[id]]=e.target.value; STATE.oppPage=1; renderOpportunities();
+  });
+});
+document.querySelectorAll('#fPriorite .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    const active=chip.classList.contains('active');
+    document.querySelectorAll('#fPriorite .chip').forEach(c=>c.classList.remove('active'));
+    STATE.filters.priorite = active? '' : chip.dataset.p;
+    if(!active) chip.classList.add('active');
+    STATE.oppPage=1; renderOpportunities();
+  });
+});
+document.getElementById('fScore').addEventListener('input', e=>{ STATE.filters.scoreMin=+e.target.value; document.getElementById('fScoreVal').textContent=e.target.value; STATE.oppPage=1; renderOpportunities(); });
+document.getElementById('resetFiltersBtn').addEventListener('click', ()=>{
+  STATE.filters={secteur:'',ville:'',type:'',statut:'',priorite:'',scoreMin:0}; STATE.oppMiniSearch=''; STATE.oppPage=1;
+  document.querySelectorAll('.filters-panel select').forEach(s=>s.value='');
+  document.getElementById('fScore').value=0; document.getElementById('fScoreVal').textContent='0';
+  document.getElementById('oppMiniSearch').value='';
+  document.querySelectorAll('#fPriorite .chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('#oppSubnav a').forEach(a=>a.classList.remove('active'));
+  document.querySelector('#oppSubnav a[data-preset="all"]').classList.add('active');
+  renderOpportunities();
+});
+document.getElementById('oppMiniSearch').addEventListener('input', e=>{ STATE.oppMiniSearch=e.target.value; STATE.oppPage=1; renderOpportunities(); });
+document.getElementById('globalSearch').addEventListener('input', e=>{
+  STATE.search=e.target.value; STATE.oppPage=1;
+  if(STATE.view!=='opportunities') switchView('opportunities'); else renderOpportunities();
+});
+document.getElementById('exportCsvBtn').addEventListener('click', ()=> exportCsv(filteredData()));
+document.getElementById('exportDashBtn').addEventListener('click', ()=> exportCsv(getData()));
+function exportCsv(data){
+  const headers=['ID','Titre','Type','Secteur','Organisateur','Ville','Date événement','Date limite','Score','Priorité','Statut','Commercial affecté','Source','URL'];
+  const rows=data.map(o=>[o.id,o.titre,o.type,o.secteur,o.organisateur,o.ville,o.dateEv,o.dateLimite,o.score,priorityLabel(o.priorite),o.statut,o.commercial||'',o.source,o.url].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const blob=new Blob(["\uFEFF"+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='opportunites_mission_conseil.csv'; a.click(); URL.revokeObjectURL(url);
+  toast('Export CSV généré — '+data.length+' opportunité(s)');
+}
+
+/* ============ OPPORTUNITY DETAIL (page dédiée) ============ */
+document.getElementById('backFromDetailBtn').addEventListener('click', ()=> switchView(STATE.previousView==='detail'?'opportunities':STATE.previousView));
+
+function openDetail(id){
+  STATE.detailId=id;
+  switchView('detail');
+}
+function renderDetail(){
+  const id = STATE.detailId;
+  const o = getData().find(x=>x.id===id);
+  const wrap = document.getElementById('detailContent');
+  if(!o){ wrap.innerHTML = '<p style="color:var(--text-faint);">Aucune opportunité sélectionnée.</p>'; return; }
+  const color=`var(${priorityColorVar(o.priorite)})`;
+  const critOrder=['adequation','potentiel','urgence','qualite','localisation','fiabilite','accessibilite'];
+  const comments = STATE.comments[id]||[];
+
+  wrap.innerHTML = `
+    <div class="detail-hero">
+      <div class="detail-hero-row">
+        <div>
+          <div class="id mono">${o.id} · collecté le ${fmtDate(o.collecte)} 2026</div>
+          <h1>${o.titre}</h1>
+          <div class="meta">
+            <span class="badge badge-${o.priorite}"><span class="badge-dot"></span>${priorityLabel(o.priorite)} · ${o.score}/100</span>
+            <span class="status-pill">${o.type}</span>
+            <span class="status-pill">${o.secteur}</span>
+            <span class="status-pill">📍 ${o.ville}</span>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-danger" id="rejectBtn">Rejeter</button>
+          <button class="btn" id="archiveBtn">Archiver</button>
+          <button class="btn btn-primary" id="validateBtn">Valider &amp; affecter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="reco-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 11-14h-7l1-6z"/></svg>Action recommandée : ${o.action}</div>
+
+    <div class="detail-grid">
+      <div>
+        <div class="d-card">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Résumé IA</h4>
+          <p class="fiche-summary">${o.resume}</p>
+          <div class="stat-tiles" style="margin-top:16px;">
+            <div class="stat-tile tile-violet"><span>Organisateur</span><b>${o.organisateur}</b></div>
+            <div class="stat-tile tile-teal"><span>Lieu</span><b>${o.lieu}</b></div>
+            <div class="stat-tile tile-amber"><span>Date événement</span><b>${fmtDate(o.dateEv)} 2026</b></div>
+          </div>
+        </div>
+
+        <div class="d-card prov-card">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>Provenance de l'information</h4>
+          <div class="prov-row">
+            <div class="prov-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg></div>
+            <div><div class="k">Source</div><div class="v">${o.source}</div></div>
+          </div>
+          <div class="prov-row">
+            <div class="prov-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg></div>
+            <div><div class="k">Lien source</div><div class="v"><a href="${o.url}" target="_blank" rel="noopener">${o.url==='#'?'Lien non disponible publiquement':o.url} ↗</a></div></div>
+          </div>
+          <div class="prov-row">
+            <div class="prov-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4M18 2l4 4-11 11H7v-4z"/></svg></div>
+            <div><div class="k">Emplacement précis</div><div class="v">${o.emplacement}</div></div>
+          </div>
+          <div class="prov-row">
+            <div class="prov-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></div>
+            <div><div class="k">Méthode de collecte · date de publication détectée</div><div class="v">${o.methode} — ${fmtDate(o.datePub)} 2026</div></div>
+          </div>
+          <div class="extract-box">${o.extrait}</div>
+          <span class="confidence-tag conf-${o.confiance}">Niveau de confiance : ${o.confiance}</span>
+        </div>
+
+        <div class="d-card">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V10M4 6V3M12 21v-7M12 10V3M20 21v-4M20 13V3"/></svg>Score &amp; qualification</h4>
+          <div class="score-breakdown">
+            ${critOrder.map(k=>`<div class="sb-row"><span class="name">${WEIGHT_LABELS[k][0]}</span><div class="sb-track"><div class="sb-fill" style="width:${o.crit[k]}%"></div></div><span class="num">${o.crit[k]}</span></div>`).join('')}
+          </div>
+          <div class="score-total"><span>Score commercial pondéré</span><b style="color:${color}">${o.score}<span style="font-size:13px;color:var(--text-faint);">/100</span></b></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="d-card">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>Traitement</h4>
+          <div class="info-grid" style="margin-bottom:16px;">
+            <div class="info-item"><span>Date limite</span><b style="color:${daysUntil(o.dateLimite)<=7?'var(--pA)':'var(--text)'}">${fmtDate(o.dateLimite)} 2026</b></div>
+            <div class="info-item"><span>Dernière mise à jour</span><b>${fmtDate(o.maj)} 2026</b></div>
+          </div>
+          <div class="action-select-row">
+            <select id="statutSelect">${STATUTS.map(s=>`<option ${s===o.statut?'selected':''}>${s}</option>`).join('')}</select>
+            <select id="commercialSelect"><option value="">Non affecté</option>${USERS.filter(u=>u.role==='Commercial'||u.role==='Direction').map(u=>`<option ${u.nom===o.commercial?'selected':''}>${u.nom}</option>`).join('')}</select>
+          </div>
+        </div>
+
+        <div class="d-card">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="7" r="4"/></svg>Intégrations</h4>
+          <div class="integration-mini">
+            <div class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6"/></svg>${CRM_CONFIG.provider}</div>
+            ${CRM_REFS[o.id] ? `<span class="sync-badge sync-ok">Lead créé · ${CRM_REFS[o.id]}</span>` : `<button class="btn btn-sm" id="pushCrmBtn">Créer le lead CRM</button>`}
+          </div>
+          <div class="integration-mini">
+            <div class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>Google Sheets</div>
+            <button class="btn btn-sm" id="pushSheetsOneBtn">Ajouter à la feuille</button>
+          </div>
+          <div class="integration-mini" style="margin-bottom:0;">
+            <div class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Google Calendar</div>
+            <button class="btn btn-sm" id="pushCalendarBtn">Créer un rappel</button>
+          </div>
+        </div>
+
+        <div class="d-card">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Historique</h4>
+          <div class="timeline">
+            <div class="timeline-item"><span class="timeline-dot"></span><div class="txt"><b>Collecté</b><span>${fmtDate(o.collecte)} 2026 — via ${o.source}</span></div></div>
+            <div class="timeline-item"><span class="timeline-dot"></span><div class="txt"><b>Scoré &amp; qualifié automatiquement</b><span>Score initial ${o.score}/100</span></div></div>
+            ${CRM_REFS[o.id] ? `<div class="timeline-item"><span class="timeline-dot"></span><div class="txt"><b>Lead créé automatiquement dans le CRM</b><span>Référence ${CRM_REFS[o.id]} · ${CRM_CONFIG.provider}</span></div></div>` : ''}
+            <div class="timeline-item last"><span class="timeline-dot"></span><div class="txt"><b>Statut actuel : ${o.statut}</b><span>Dernière mise à jour ${fmtDate(o.maj)} 2026</span></div></div>
+          </div>
+        </div>
+
+        <div class="d-card">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Commentaires</h4>
+          <div class="comment-list">
+            ${comments.length? comments.map(c=>`<div class="comment-item"><div class="c-avatar">${initials(c.who)}</div><div class="comment-bubble"><div class="who">${c.who} · ${c.when}</div>${c.txt}</div></div>`).join('') : '<p style="color:var(--text-faint);font-size:12px;">Aucun commentaire pour le moment.</p>'}
+          </div>
+          <div class="comment-form"><textarea id="commentInput" placeholder="Ajouter un commentaire pour l'équipe…"></textarea><button class="btn btn-sm btn-primary" id="addCommentBtn">Publier</button></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('statutSelect').addEventListener('change', e=>{
+    const raw=RAW.find(r=>r.id===o.id); raw.statut=e.target.value; raw.maj='2026-08-16';
+    toast('Statut mis à jour : '+e.target.value); renderAll();
+  });
+  document.getElementById('commercialSelect').addEventListener('change', e=>{
+    const raw=RAW.find(r=>r.id===o.id); raw.commercial=e.target.value||null; raw.maj='2026-08-16';
+    toast(e.target.value?'Affecté à '+e.target.value:'Affectation retirée'); renderAll();
+  });
+  document.getElementById('addCommentBtn').addEventListener('click', ()=>{
+    const txt=document.getElementById('commentInput').value.trim(); if(!txt) return;
+    if(!STATE.comments[o.id]) STATE.comments[o.id]=[];
+    STATE.comments[o.id].push({who:'Aziz Bouslemati', txt, when:"à l'instant"});
+    renderDetail();
+  });
+  document.getElementById('validateBtn').addEventListener('click', ()=>{
+    const raw=RAW.find(r=>r.id===o.id); raw.statut = raw.commercial ? 'Contact à faire' : 'À traiter'; raw.maj='2026-08-16';
+    toast('Opportunité validée');
+    if(!CRM_REFS[o.id] && CRM_CONFIG.connected) pushToCrm(o);
+    renderDetail(); renderAll();
+  });
+  document.getElementById('rejectBtn').addEventListener('click', ()=>{
+    const raw=RAW.find(r=>r.id===o.id); raw.statut='Non pertinent'; raw.maj='2026-08-16';
+    toast('Opportunité rejetée'); renderDetail(); renderAll();
+  });
+  document.getElementById('archiveBtn').addEventListener('click', ()=>{
+    const raw=RAW.find(r=>r.id===o.id); raw.statut='Archivé'; raw.maj='2026-08-16';
+    toast('Opportunité archivée'); renderDetail(); renderAll();
+  });
+  const pushCrmBtn=document.getElementById('pushCrmBtn');
+  if(pushCrmBtn) pushCrmBtn.addEventListener('click', ()=>{ pushToCrm(o); renderDetail(); });
+  document.getElementById('pushSheetsOneBtn').addEventListener('click', ()=>{ pushToSheets(1, 'Aziz Bouslemati (manuel)'); });
+  document.getElementById('pushCalendarBtn').addEventListener('click', ()=>{ createCalendarReminder(o); });
+}
+
+/* ============ REPORTS ============ */
+document.querySelectorAll('.tab[data-rep]').forEach(t=>{
+  t.addEventListener('click', ()=>{ STATE.reportTab=t.dataset.rep; syncReportTabs(); renderReport(); });
+});
+function syncReportTabs(){
+  document.querySelectorAll('.tab[data-rep]').forEach(x=>x.classList.toggle('active', x.dataset.rep===STATE.reportTab));
+  document.querySelectorAll('.nav-item[data-view="reports"]').forEach(el=> el.classList.toggle('active', el.dataset.rep===STATE.reportTab && STATE.view==='reports'));
+}
+document.getElementById('downloadReportBtn').addEventListener('click', ()=>{
+  const data=getData(); const text=buildReportText(STATE.reportTab,data);
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8;'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='rapport_'+STATE.reportTab+'_mission_conseil.txt'; a.click(); URL.revokeObjectURL(url);
+  toast('Rapport téléchargé');
+});
+document.getElementById('sendReportBtn').addEventListener('click', openEmailModal);
+let EMAIL_MODAL_EXTRA = [];
+function openEmailModal(){
+  EMAIL_MODAL_EXTRA = [];
+  const repLabel = {daily:'Rapport quotidien', weekly:'Rapport hebdomadaire', monthly:'Rapport mensuel'}[STATE.reportTab];
+  document.getElementById('emailModalTitle').textContent = 'Envoyer le '+repLabel.toLowerCase();
+  renderEmailModalList();
+  document.getElementById('emailOverlay').classList.add('open');
+}
+function renderEmailModalList(){
+  const list = [...(RECIPIENTS[STATE.reportTab]||[]), ...EMAIL_MODAL_EXTRA];
+  const el = document.getElementById('emailModalList');
+  el.innerHTML = list.length ? list.map(email=>`<div class="recip-modal-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Sera envoyé à <b>${email}</b></div>`).join('')
+    : '<p style="font-size:12.4px;color:var(--text-faint);">Aucun destinataire configuré pour cette cadence — ajoutez-en un ci-dessous ou depuis la page « Alertes & destinataires email ».</p>';
+}
+document.getElementById('emailModalAddBtn').addEventListener('click', ()=>{
+  const input=document.getElementById('emailModalInput'); const val=input.value.trim();
+  if(!val || !val.includes('@')){ toast('Adresse email invalide'); return; }
+  EMAIL_MODAL_EXTRA.push(val); input.value=''; renderEmailModalList();
+});
+document.getElementById('emailModalCancelBtn').addEventListener('click', ()=> document.getElementById('emailOverlay').classList.remove('open'));
+document.getElementById('emailModalSendBtn').addEventListener('click', ()=>{
+  const list = [...(RECIPIENTS[STATE.reportTab]||[]), ...EMAIL_MODAL_EXTRA];
+  document.getElementById('emailOverlay').classList.remove('open');
+  if(list.length===0){ toast('Aucun destinataire — configurez les adresses dans Alertes & destinataires email'); return; }
+  toast('Rapport envoyé à : '+list.join(', '));
+});
+function buildReportText(tab,data){
+  const top=[...data].sort((a,b)=>b.score-a.score).slice(0,5);
+  let t=`RAPPORT ${tab.toUpperCase()} — MISSION CONSEIL GROUP\n16 août 2026\n\n`;
+  t+='TOP OPPORTUNITÉS\n';
+  top.forEach((o,i)=> t+=`${i+1}. [${priorityLabel(o.priorite)} · ${o.score}/100] ${o.titre} — ${o.ville} — ${o.action}\n`);
+  return t;
+}
+function renderReport(){
+  const data=getData(); const card=document.getElementById('reportCard'); const tab=STATE.reportTab;
+  if(tab==='daily'){
+    const top=[...data].sort((a,b)=>b.score-a.score).slice(0,5);
+    const urgent=data.filter(o=>daysUntil(o.dateLimite)<=10 && daysUntil(o.dateLimite)>=0);
+    card.innerHTML=`
+      <div class="report-card-head"><div><h2>Rapport quotidien</h2><p>Samedi 16 août 2026 · Généré automatiquement à 08:30 · ${data.length} opportunités actives</p></div><span class="badge badge-A"><span class="badge-dot"></span>${urgent.length} alertes urgentes</span></div>
+      <div class="report-cols">
+        <div class="report-section" style="margin-bottom:0;"><h4>Top opportunités du jour</h4>${top.map((o,i)=>`<div class="report-item"><span class="n">${String(i+1).padStart(2,'0')}</span><div class="txt"><b>${o.titre}</b><span>${o.ville} · ${o.secteur} · score ${o.score}/100 · ${priorityLabel(o.priorite)}</span></div></div>`).join('')}</div>
+        <div>
+          <div class="report-section"><h4>Alertes urgentes — deadline proche</h4>${urgent.length?urgent.map(o=>`<div class="report-item"><span class="n">⚠</span><div class="txt"><b>${o.titre}</b><span>Date limite ${fmtDate(o.dateLimite)} · J-${daysUntil(o.dateLimite)}</span></div></div>`).join(''):'<p style="font-size:12.4px;color:var(--text-faint);">Aucune échéance critique sous 10 jours.</p>'}</div>
+          <div class="report-section" style="margin-bottom:0;"><h4>Actions recommandées</h4>${top.slice(0,3).map(o=>`<div class="reco-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>${o.action} — <i>${o.titre.slice(0,40)}…</i></div>`).join('')}</div>
+        </div>
+      </div>`;
+  } else if(tab==='weekly'){
+    const qualifiees=data.filter(o=>!['Nouveau'].includes(o.statut)).length;
+    const urgentes=data.filter(o=>o.priorite==='A').length;
+    const rejetees=data.filter(o=>['Non pertinent'].includes(o.statut)).length;
+    const converties=data.filter(o=>['Contacté','Réponse envoyée','Gagné'].includes(o.statut)).length;
+    const by={}; data.forEach(o=> by[o.secteur]=(by[o.secteur]||0)+1);
+    card.innerHTML=`
+      <div class="report-card-head"><div><h2>Rapport hebdomadaire</h2><p>Semaine du 10 au 16 août 2026</p></div></div>
+      <div class="report-stats"><div class="report-stat"><b>${data.length}</b><span>Détectées</span></div><div class="report-stat"><b>${qualifiees}</b><span>Qualifiées</span></div><div class="report-stat"><b>${urgentes}</b><span>Urgentes</span></div><div class="report-stat"><b>${rejetees}</b><span>Rejetées</span></div><div class="report-stat"><b>${converties}</b><span>Converties</span></div></div>
+      <div class="report-cols">
+        <div class="report-section" style="margin-bottom:0;"><h4>Analyse par secteur</h4>${Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([s,c])=>`<div class="report-item"><span class="n mono">${c}</span><div class="txt"><b>${s}</b></div></div>`).join('')}</div>
+        <div class="report-section" style="margin-bottom:0;"><h4>Prospects à contacter en priorité — semaine prochaine</h4>${data.filter(o=>['Contact à faire','À traiter'].includes(o.statut)).slice(0,7).map(o=>`<div class="report-item"><span class="n">→</span><div class="txt"><b>${o.organisateur}</b><span>${o.titre}</span></div></div>`).join('')}</div>
+      </div>`;
+  } else {
+    const by={}; data.forEach(o=> by[o.secteur]=(by[o.secteur]||0)+1);
+    const topSector=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];
+    card.innerHTML=`
+      <div class="report-card-head"><div><h2>Rapport mensuel</h2><p>Août 2026 — vue stratégique</p></div></div>
+      <div class="report-section"><h4>Vue stratégique du marché</h4><p style="font-size:12.7px;color:var(--text-dim);line-height:1.7;">Le secteur <b style="color:var(--text)">${topSector[0]}</b> concentre le plus grand nombre d'opportunités qualifiées ce mois-ci (${topSector[1]}). La dynamique événementielle reste forte sur l'axe Casablanca–Rabat, avec une montée notable des activations sportives liées à la CAN 2026.</p></div>
+      <div class="report-cols">
+        <div class="report-section" style="margin-bottom:0;"><h4>Calendrier prospectif</h4>${data.slice().sort((a,b)=>a.dateEv.localeCompare(b.dateEv)).slice(0,9).map(o=>`<div class="report-item"><span class="n mono">${fmtDate(o.dateEv)}</span><div class="txt"><b>${o.titre}</b><span>${o.ville}</span></div></div>`).join('')}</div>
+        <div>
+          <div class="report-section"><h4>Recommandations commerciales</h4>
+            <div class="reco-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>Renforcer la prospection institutionnelle avant la clôture des marchés publics du T4.</div>
+            <div class="reco-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>Positionner une offre dédiée aux fan zones dans la perspective de la CAN 2026.</div>
+            <div class="reco-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>Suivre les signaux faibles réseaux sociaux détectés avec un faible niveau de confiance.</div>
+          </div>
+          <div class="report-section" style="margin-bottom:0;"><h4>Performance de l'agent IA</h4><div class="report-item"><div class="txt"><b>Taux de doublons détectés</b><span>4,2 % des contenus collectés</span></div></div><div class="report-item"><div class="txt"><b>Alertes jugées utiles</b><span>87 % (retour utilisateurs)</span></div></div></div>
+        </div>
+      </div>`;
+  }
+}
+
+/* ============ SCORING ============ */
+function renderWeights(){
+  const wrap=document.getElementById('weightRows');
+  wrap.innerHTML=Object.keys(WEIGHTS).map(k=>`
+    <div class="weight-row"><div class="lbl">${WEIGHT_LABELS[k][0]}<small>${WEIGHT_LABELS[k][1]}</small></div>
+    <input type="range" min="0" max="60" value="${WEIGHTS[k]}" data-k="${k}" class="weightSlider">
+    <div class="val" id="wval-${k}">${WEIGHTS[k]}%</div></div>`).join('');
+  wrap.querySelectorAll('.weightSlider').forEach(s=>{
+    s.addEventListener('input', e=>{
+      WEIGHTS[e.target.dataset.k]=+e.target.value;
+      document.getElementById('wval-'+e.target.dataset.k).textContent=e.target.value+'%';
+      updateWeightTotal(); renderAll();
+    });
+  });
+  updateWeightTotal();
+}
+function updateWeightTotal(){
+  const total=Object.values(WEIGHTS).reduce((a,b)=>a+b,0);
+  const el=document.getElementById('weightTotal'); el.textContent=total+'%'; el.className=total===100?'ok':'bad';
+}
+['thA','thB','thC'].forEach(id=> document.getElementById(id).addEventListener('input', e=>{ THRESH[id.replace('th','')]=+e.target.value; renderAll(); }));
+function renderScoringDistribution(){
+  const el=document.getElementById('scoringDistribution'); if(!el) return;
+  const data=getData(); const total=data.length;
+  const counts={A:data.filter(o=>o.priorite==='A').length, B:data.filter(o=>o.priorite==='B').length, C:data.filter(o=>o.priorite==='C').length, R:data.filter(o=>o.priorite==='R').length};
+  el.innerHTML = ['A','B','C','R'].map(p=>`
+    <div class="sector-bar-row" style="grid-template-columns:100px 1fr 30px;">
+      <span class="name"><span class="badge badge-${p}" style="padding:2px 8px;"><span class="badge-dot"></span>${p==='R'?'Rejet':p}</span></span>
+      <div class="sector-bar-track"><div class="sector-bar-fill" style="width:${total?(counts[p]/total*100):0}%;background:var(${priorityColorVar(p)})"></div></div>
+      <span class="num">${counts[p]}</span>
+    </div>`).join('');
+}
+
+/* ============ SECTORS ============ */
+function renderSectorRows(){
+  const hint=document.getElementById('sectorCountHint'); if(hint) hint.textContent = SECTORS.length+' secteur(s) configuré(s).';
+  document.getElementById('sectorRows').innerHTML = SECTORS.map((s,i)=>`
+    <div class="sector-row"><span class="nm">${s.nom}</span>
+      <select data-i="${i}">
+        <option ${s.niveau==='Élevée'?'selected':''}>Élevée</option>
+        <option ${s.niveau==='Moyenne'?'selected':''}>Moyenne</option>
+        <option ${s.niveau==='Faible'?'selected':''}>Faible</option>
+      </select>
+      <button class="remove-x" data-rm="${i}">✕</button>
+    </div>`).join('');
+  document.querySelectorAll('#sectorRows select').forEach(s=> s.addEventListener('change', e=>{ SECTORS[+e.target.dataset.i].niveau=e.target.value; toast('Priorité mise à jour : '+SECTORS[+e.target.dataset.i].nom); }));
+  document.querySelectorAll('#sectorRows .remove-x').forEach(b=> b.addEventListener('click', ()=>{ SECTORS.splice(+b.dataset.rm,1); renderSectorRows(); }));
+}
+document.getElementById('addSectorBtn').addEventListener('click', ()=>{
+  const input=document.getElementById('newSectorInput'); const val=input.value.trim(); if(!val) return;
+  SECTORS.push({nom:val, niveau:'Moyenne'}); input.value=''; renderSectorRows(); toast('Secteur ajouté : '+val);
+});
+
+/* ============ CITIES ============ */
+function renderCityRows(){
+  const hint=document.getElementById('cityCountHint'); if(hint) hint.textContent = CITIES.length+' ville(s) classée(s).';
+  document.getElementById('cityRows').innerHTML = CITIES.map((c,i)=>`
+    <div class="city-row"><span class="rank-badge">${i+1}</span><span class="nm">${c.nom}</span>
+      <span class="city-weight">${c.poids}%</span>
+      <div class="updown"><button data-up="${i}" ${i===0?'disabled':''}>▲</button><button data-down="${i}" ${i===CITIES.length-1?'disabled':''}>▼</button></div>
+      <button class="remove-x" data-rm="${i}">✕</button>
+    </div>`).join('');
+  document.querySelectorAll('#cityRows [data-up]').forEach(b=> b.addEventListener('click', ()=>{ const i=+b.dataset.up; [CITIES[i-1],CITIES[i]]=[CITIES[i],CITIES[i-1]]; recomputeCityWeights(); renderCityRows(); }));
+  document.querySelectorAll('#cityRows [data-down]').forEach(b=> b.addEventListener('click', ()=>{ const i=+b.dataset.down; [CITIES[i+1],CITIES[i]]=[CITIES[i],CITIES[i+1]]; recomputeCityWeights(); renderCityRows(); }));
+  document.querySelectorAll('#cityRows .remove-x').forEach(b=> b.addEventListener('click', ()=>{ CITIES.splice(+b.dataset.rm,1); recomputeCityWeights(); renderCityRows(); }));
+}
+function recomputeCityWeights(){ const n=CITIES.length; CITIES.forEach((c,i)=>{ c.poids=Math.round(100-(i*(100/Math.max(n,1)))); }); }
+document.getElementById('addCityBtn').addEventListener('click', ()=>{
+  const input=document.getElementById('newCityInput'); const val=input.value.trim(); if(!val) return;
+  CITIES.push({nom:val, poids:10}); recomputeCityWeights(); input.value=''; renderCityRows(); toast('Ville ajoutée : '+val);
+});
+
+/* ============ DIFFUSION ============ */
+function renderRecipients(){
+  ['daily','weekly','monthly'].forEach(rep=>{
+    const el = document.getElementById('recip'+rep[0].toUpperCase()+rep.slice(1));
+    el.innerHTML = RECIPIENTS[rep].map((email,i)=>`<span class="recipient-chip">${email}<button data-rep="${rep}" data-rm="${i}">✕</button></span>`).join('') || '<span style="font-size:11.5px;color:var(--text-faint);">Aucun destinataire</span>';
+  });
+  document.querySelectorAll('.recipient-chip button').forEach(b=> b.addEventListener('click', ()=>{
+    RECIPIENTS[b.dataset.rep].splice(+b.dataset.rm,1); renderRecipients();
+  }));
+}
+document.querySelectorAll('[data-action="addRecip"]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const rep=btn.dataset.rep; const inputId='recip'+rep[0].toUpperCase()+rep.slice(1)+'Input';
+    const input=document.getElementById(inputId); const val=input.value.trim();
+    if(!val || !val.includes('@')){ toast('Adresse email invalide'); return; }
+    RECIPIENTS[rep].push(val); input.value=''; renderRecipients(); toast('Destinataire ajouté');
+  });
+});
+
+/* ============ SOURCES ============ */
+function renderSources(){
+  let data = SOURCES.filter(s=> (s.nom+' '+s.famille).toLowerCase().includes(STATE.sourceSearch.toLowerCase()));
+  const totalPages=Math.max(1,Math.ceil(data.length/STATE.sourcePerPage));
+  if(STATE.sourcePage>totalPages) STATE.sourcePage=totalPages;
+  const start=(STATE.sourcePage-1)*STATE.sourcePerPage;
+  const page = data.slice(start, start+STATE.sourcePerPage);
+  const icons={"Appels d'offres":'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>', 'Institutionnel':'<path d="M3 21h18M5 21V7l7-4 7 4v14"/>', 'Réseaux sociaux':'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 10.8l7.4-3.6M8.3 13.2l7.4 3.6"/>', 'Médias':'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h2M7 13h6"/>', 'Événements':'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>', 'Email':'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>', 'Interne':'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/>', 'Personnalisée':'<circle cx="12" cy="12" r="9"/>'};
+  document.getElementById('sourceList').innerHTML = page.map(s=>`
+    <div class="source-item">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icons[s.famille]||icons['Personnalisée']}</svg></div>
+      <div style="flex:1;"><div class="fam">${s.famille} · ${s.freq}</div><div class="nm">${s.nom}</div></div>
+      <button class="btn btn-sm btn-ghost" data-test="${s.id}">Tester</button>
+      <div class="toggle ${s.actif?'on':''}" data-id="${s.id}"></div>
+    </div>`).join('') || '<p style="color:var(--text-faint);font-size:12.5px;padding:10px 0;">Aucune source ne correspond à cette recherche.</p>';
+  document.querySelectorAll('.source-item .toggle').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      const s=SOURCES.find(x=>x.id===t.dataset.id); s.actif=!s.actif; renderSources();
+      toast((s.actif?'Source activée : ':'Source suspendue : ')+s.nom);
+    });
+  });
+  document.querySelectorAll('.source-item [data-test]').forEach(b=>{
+    b.addEventListener('click', ()=>{ toast('Connexion testée avec succès — flux disponible'); });
+  });
+  renderPagination('sourcePagination', STATE.sourcePage, totalPages, p=>{ STATE.sourcePage=p; renderSources(); });
+}
+document.getElementById('sourceSearch').addEventListener('input', e=>{ STATE.sourceSearch=e.target.value; STATE.sourcePage=1; renderSources(); });
+document.getElementById('addSourceBtn').addEventListener('click', ()=>{
+  const nameInput=document.getElementById('newSourceName');
+  const val=nameInput.value.trim();
+  if(!val){ toast('Merci de saisir un nom de source'); nameInput.focus(); return; }
+  const famille=document.getElementById('newSourceFamille').value;
+  const freq=document.getElementById('newSourceFreq').value;
+  SOURCES.unshift({id:'s'+Date.now(), nom:val, famille, freq, actif:true});
+  nameInput.value=''; STATE.sourcePage=1; STATE.sourceSearch=''; document.getElementById('sourceSearch').value='';
+  renderSources();
+  toast('Source ajoutée : '+val);
+});
+
+/* ============ KEYWORDS ============ */
+function renderKeywords(){
+  document.getElementById('keywordList').innerHTML = KEYWORDS.map((k,i)=>`<span class="tag">${k}<button data-i="${i}">✕</button></span>`).join('');
+  document.querySelectorAll('#keywordList button').forEach(b=> b.addEventListener('click', ()=>{ KEYWORDS.splice(+b.dataset.i,1); renderKeywords(); }));
+  document.getElementById('typoList').innerHTML = TYPOLOGIES.map(t=>`<span class="tag" style="cursor:default;">${t}</span>`).join('');
+}
+document.getElementById('addKeywordBtn').addEventListener('click', ()=>{
+  const input=document.getElementById('newKeywordInput'); const val=input.value.trim(); if(!val) return;
+  KEYWORDS.push(val); input.value=''; renderKeywords(); toast('Mot-clé ajouté : '+val);
+});
+
+/* ============ USERS & PERMISSIONS ============ */
+function renderUsersTable(){
+  let data = USERS.filter(u=> (u.nom+' '+u.email+' '+u.role).toLowerCase().includes(document.getElementById('userSearch').value.toLowerCase()));
+  const {col,dir}=STATE.userSort;
+  data = [...data].sort((a,b)=>{ let av=a[col].toLowerCase(), bv=b[col].toLowerCase(); if(av<bv) return dir==='asc'?-1:1; if(av>bv) return dir==='asc'?1:-1; return 0; });
+  document.getElementById('userCount').textContent = USERS.length;
+  document.getElementById('usersTable').innerHTML = data.map(u=>`
+    <tr>
+      <td><div class="user-cell"><div class="avatar" style="width:28px;height:28px;font-size:10.5px;">${initials(u.nom)}</div><div><b style="font-size:12.6px;">${u.nom}</b><br><span style="font-size:11px;color:var(--text-faint);">${u.email}</span></div></div></td>
+      <td><select class="role-select" data-id="${u.id}">${ROLES.map(r=>`<option ${r===u.role?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td><span class="status-pill" style="${u.actif?'':'color:var(--pA);border-color:var(--pA-soft);'}">${u.actif?'Actif':'Suspendu'}</span></td>
+      <td style="text-align:right;"><button class="btn btn-sm btn-ghost" data-toggle="${u.id}">${u.actif?'Suspendre':'Réactiver'}</button></td>
+    </tr>`).join('');
+  document.querySelectorAll('.role-select').forEach(s=> s.addEventListener('change', e=>{
+    const u=USERS.find(x=>x.id===e.target.dataset.id); u.role=e.target.value; renderUsersTable(); renderPermTable(); toast('Rôle mis à jour pour '+u.nom);
+  }));
+  document.querySelectorAll('[data-toggle]').forEach(b=> b.addEventListener('click', ()=>{
+    const u=USERS.find(x=>x.id===b.dataset.toggle); u.actif=!u.actif; renderUsersTable(); toast((u.actif?'Compte réactivé : ':'Compte suspendu : ')+u.nom);
+  }));
+}
+document.querySelectorAll('#view-users thead th[data-usort]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const col=th.dataset.usort;
+    if(STATE.userSort.col===col) STATE.userSort.dir = STATE.userSort.dir==='asc'?'desc':'asc'; else STATE.userSort={col,dir:'asc'};
+    renderUsersTable();
+  });
+});
+document.getElementById('userSearch').addEventListener('input', renderUsersTable);
+document.getElementById('addUserBtn').addEventListener('click', ()=>{
+  const nameInput=document.getElementById('newUserName'), emailInput=document.getElementById('newUserEmail');
+  const nom=nameInput.value.trim(), email=emailInput.value.trim(), role=document.getElementById('newUserRole').value;
+  if(!nom || !email || !email.includes('@')){ toast('Merci de renseigner un nom et un email valide'); return; }
+  USERS.push({id:'u'+Date.now(), nom, role, email, actif:true});
+  nameInput.value=''; emailInput.value='';
+  renderUsersTable(); renderPermTable();
+  toast('Utilisateur ajouté : '+nom);
+});
+function renderPermTable(){
+  document.getElementById('permTable').innerHTML = PERMISSIONS.map(p=>`
+    <tr><td>${p.label}</td>${ROLES.map(r=>`<td class="role-col"><input type="checkbox" class="perm-check" data-role="${r}" data-perm="${p.key}" ${PERMS[r][p.key]?'checked':''}></td>`).join('')}</tr>`).join('');
+  document.querySelectorAll('.perm-check').forEach(cb=> cb.addEventListener('change', e=>{
+    PERMS[e.target.dataset.role][e.target.dataset.perm]=e.target.checked;
+    toast('Permission mise à jour — '+e.target.dataset.role);
+  }));
+}
+
+/* ============ SCAN "Lancer une veille" ============ */
+const SCAN_STEPS = [
+  {label:'Connexion aux sources actives', dur:900},
+  {label:'Extraction & classification IA', dur:1100},
+  {label:'Déduplication des contenus', dur:800},
+  {label:'Scoring & priorisation', dur:900},
+];
+document.getElementById('scanBtn').addEventListener('click', runScan);
+document.getElementById('bellBtn').addEventListener('click', ()=>{
+  applyPreset('A');
+  document.querySelectorAll('#oppSubnav a').forEach(a=>a.classList.remove('active'));
+  document.querySelector('#oppSubnav a[data-preset="A"]').classList.add('active');
+  switchView('opportunities');
+});
+document.getElementById('scanCancelBtn').addEventListener('click', closeScan);
+document.getElementById('scanSeeResultsBtn').addEventListener('click', ()=>{
+  closeScan(); applyPreset('all'); STATE.filters._recent=true;
+  STATE.filters = {secteur:'',ville:'',type:'',statut:'',priorite:'',scoreMin:0};
+  STATE.oppSort={col:'collecte',dir:'desc'};
+  switchView('opportunities');
+  document.querySelectorAll('#oppSubnav a').forEach(a=>a.classList.remove('active'));
+  document.querySelector('#oppSubnav a[data-preset="all"]').classList.add('active');
+});
+function closeScan(){ document.getElementById('scanOverlay').classList.remove('open'); }
+function runScan(){
+  const overlay=document.getElementById('scanOverlay');
+  const stepsEl=document.getElementById('scanSteps');
+  const resultEl=document.getElementById('scanResult');
+  const seeBtn=document.getElementById('scanSeeResultsBtn');
+  resultEl.classList.remove('show'); seeBtn.classList.add('hidden');
+  stepsEl.innerHTML = SCAN_STEPS.map((s,i)=>`<div class="scan-step" data-i="${i}"><div class="dot"></div><span>${s.label}</span></div>`).join('');
+  overlay.classList.add('open');
+  let i=0;
+  function nextStep(){
+    const rows = stepsEl.querySelectorAll('.scan-step');
+    if(i>0){ rows[i-1].classList.remove('active'); rows[i-1].classList.add('done'); rows[i-1].querySelector('.dot').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>'; }
+    if(i>=SCAN_STEPS.length){
+      const newCount = RAW.filter(r=>r.collecte==='2026-08-16').length;
+      const pACount = getData().filter(o=>o.priorite==='A' && o.collecte==='2026-08-16').length;
+      resultEl.innerHTML = `<b>Veille terminée</b><span>${newCount} opportunité(s) collectée(s) aujourd'hui, dont ${pACount} en priorité A. Sources actives interrogées : ${SOURCES.filter(s=>s.actif).length}/${SOURCES.length}.</span>`;
+      resultEl.classList.add('show');
+      seeBtn.classList.remove('hidden');
+      return;
+    }
+    rows[i].classList.add('active');
+    setTimeout(()=>{ i++; nextStep(); }, SCAN_STEPS[i].dur);
+  }
+  nextStep();
+}
+
+/* =========================================================
+   MASTER RENDER
+   ========================================================= */
+function renderAll(){
+  const data=getData();
+  document.getElementById('navBadgeOpp').textContent = data.filter(o=>o.priorite==='A').length;
+  document.getElementById('cnt-all').textContent = data.length;
+  document.getElementById('cnt-A').textContent = data.filter(o=>o.priorite==='A').length;
+  document.getElementById('cnt-qualif').textContent = data.filter(o=>o.statut==='À qualifier').length;
+  document.getElementById('cnt-cours').textContent = data.filter(o=>!['Gagné','Perdu','Archivé','Non pertinent','Nouveau'].includes(o.statut)).length;
+  document.getElementById('cnt-archive').textContent = data.filter(o=>['Gagné','Perdu','Archivé','Non pertinent'].includes(o.statut)).length;
+
+  if(STATE.view==='dashboard'){ renderKPIs(data); renderRadar(data); renderSectorBars(data); renderDashboardTable(data); }
+  if(STATE.view==='opportunities'){ populateFilterOptions(data); renderOpportunities(); }
+  if(STATE.view==='detail'){ renderDetail(); }
+  if(STATE.view==='sources'){ renderSources(); }
+  if(STATE.view==='keywords'){ renderKeywords(); }
+  if(STATE.view==='reports'){ syncReportTabs(); renderReport(); }
+  if(STATE.view==='scoring'){ renderWeights(); renderScoringDistribution(); }
+  if(STATE.view==='sectors'){ renderSectorRows(); }
+  if(STATE.view==='cities'){ renderCityRows(); }
+  if(STATE.view==='diffusion'){ renderRecipients(); }
+  if(STATE.view==='users'){ renderUsersTable(); renderPermTable(); }
+  if(STATE.view==='crm'){ renderCrmView(); }
+  if(STATE.view==='sheets'){ renderSheetsView(); }
+  if(STATE.view==='calendar'){ renderCalendarView(); }
+  document.getElementById('navBadgeCrm').textContent = CRM_LOG.length || '';
+  document.getElementById('navBadgeCrm').classList.toggle('hidden', CRM_LOG.length===0);
+}
+
+/* ============ CRM VIEW ============ */
+function connCardHtml(connected, label, sub){
+  return `<div class="conn-card ${connected?'on':'off'}"><div class="conn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="${connected?'var(--success)':'var(--pR)'}" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+    <div class="grow"><h4>${label}</h4><p>${sub}</p></div>
+    <div class="conn-status ${connected?'on':'off'}"><span class="d"></span>${connected?'Connecté':'Non connecté'}</div></div>`;
+}
+function renderCrmView(){
+  document.getElementById('crmConnCard').innerHTML = connCardHtml(CRM_CONFIG.connected, CRM_CONFIG.provider, 'Pipeline actif : '+CRM_CONFIG.pipeline);
+  document.getElementById('crmProviderSelect').value = CRM_CONFIG.provider;
+  document.getElementById('crmPipelineSelect').value = CRM_CONFIG.pipeline;
+  const body=document.getElementById('crmLogBody'), empty=document.getElementById('crmLogEmpty');
+  if(CRM_LOG.length===0){ body.innerHTML=''; empty.classList.remove('hidden'); }
+  else{
+    empty.classList.add('hidden');
+    body.innerHTML = CRM_LOG.map(l=>`<tr><td><b style="font-size:12.6px;">${l.titre}</b></td><td class="mono">${l.ref}</td><td>${l.date}</td><td><span class="sync-badge sync-ok">${l.statut}</span></td><td><a href="#" data-open="${l.oppId}" style="color:var(--primary);font-weight:600;font-size:12px;">Voir la fiche →</a></td></tr>`).join('');
+    body.querySelectorAll('[data-open]').forEach(a=> a.addEventListener('click', e=>{ e.preventDefault(); openDetail(a.dataset.open); }));
+  }
+}
+document.getElementById('crmProviderSelect').addEventListener('change', e=>{ CRM_CONFIG.provider=e.target.value; toast('CRM cible mis à jour : '+e.target.value); renderAll(); });
+document.getElementById('crmPipelineSelect').addEventListener('change', e=>{ CRM_CONFIG.pipeline=e.target.value; toast('Pipeline mis à jour'); renderAll(); });
+document.getElementById('forceSyncCrmBtn').addEventListener('click', ()=>{
+  const pending = getData().filter(o=>['Contact à faire','Contacté','Devis / pitch à préparer','Réponse envoyée','Gagné'].includes(o.statut) && !CRM_REFS[o.id]);
+  if(pending.length===0){ toast('Toutes les opportunités qualifiées sont déjà synchronisées'); return; }
+  pending.forEach(o=> pushToCrm(o));
+  toast(pending.length+' lead(s) envoyé(s) vers '+CRM_CONFIG.provider);
+});
+
+/* ============ GOOGLE SHEETS VIEW ============ */
+function renderSheetsView(){
+  document.getElementById('sheetsConnCard').innerHTML = connCardHtml(SHEETS_CONFIG.connected, 'Google Sheets', 'Feuille cible configurée ci-dessous');
+  document.getElementById('sheetsUrlInput').value = SHEETS_CONFIG.url;
+  document.getElementById('sheetsColumnsList').innerHTML = SHEETS_COLUMNS.map(c=>`<span class="tag" style="cursor:default;">${c}</span>`).join('');
+  const body=document.getElementById('sheetsLogBody'), empty=document.getElementById('sheetsLogEmpty');
+  if(SHEETS_LOG.length===0){ body.innerHTML=''; empty.classList.remove('hidden'); }
+  else{
+    empty.classList.add('hidden');
+    body.innerHTML = SHEETS_LOG.map(l=>`<tr><td>${l.date}</td><td class="mono">${l.rows}</td><td>${l.by}</td><td><span class="sync-badge sync-ok">${l.statut}</span></td></tr>`).join('');
+  }
+}
+document.getElementById('saveSheetsUrlBtn').addEventListener('click', ()=>{
+  SHEETS_CONFIG.url = document.getElementById('sheetsUrlInput').value.trim();
+  toast('Lien Google Sheets enregistré'); renderAll();
+});
+document.getElementById('syncSheetsBtn').addEventListener('click', ()=> pushToSheets(getData().length, 'Synchronisation manuelle'));
+
+/* ============ GOOGLE CALENDAR VIEW ============ */
+function renderCalendarView(){
+  document.getElementById('calendarConnCard').innerHTML = connCardHtml(CALENDAR_CONFIG.connected, 'Google Calendar', 'Compte : '+CALENDAR_CONFIG.account);
+  document.getElementById('calendarNameSelect').value = CALENDAR_CONFIG.calendarName;
+  const body=document.getElementById('calendarLogBody'), empty=document.getElementById('calendarLogEmpty');
+  if(CALENDAR_LOG.length===0){ body.innerHTML=''; empty.classList.remove('hidden'); }
+  else{
+    empty.classList.add('hidden');
+    body.innerHTML = CALENDAR_LOG.map(l=>`<tr><td><b style="font-size:12.6px;">${l.titre}</b></td><td class="mono">${l.date}</td><td><a href="#" data-open="${l.oppId}" style="color:var(--primary);font-weight:600;font-size:12px;">${l.oppId}</a></td><td><span class="sync-badge sync-ok">${l.statut}</span></td></tr>`).join('');
+    body.querySelectorAll('[data-open]').forEach(a=> a.addEventListener('click', e=>{ e.preventDefault(); openDetail(a.dataset.open); }));
+  }
+}
+document.getElementById('calendarNameSelect').addEventListener('change', e=>{ CALENDAR_CONFIG.calendarName=e.target.value; toast('Calendrier de destination mis à jour'); });
+document.getElementById('bulkCalendarBtn').addEventListener('click', ()=>{
+  const urgent = getData().filter(o=> daysUntil(o.dateLimite)<=14 && daysUntil(o.dateLimite)>=0 && !CALENDAR_LOG.some(l=>l.oppId===o.id));
+  if(urgent.length===0){ toast('Aucune nouvelle échéance à moins de 14 jours'); return; }
+  urgent.forEach(o=> createCalendarReminder(o));
+  toast(urgent.length+' rappel(s) créé(s) dans Google Calendar');
+});
+
+/* ============ EXPORT EXCEL ============ */
+function exportXlsx(data){
+  const rows = data.map(o=>({
+    ID:o.id, Titre:o.titre, Type:o.type, Secteur:o.secteur, Organisateur:o.organisateur, Ville:o.ville,
+    'Date événement':o.dateEv, 'Date limite':o.dateLimite, Score:o.score, Priorité:priorityLabel(o.priorite),
+    Statut:o.statut, 'Commercial affecté':o.commercial||'', Source:o.source, URL:o.url
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:11},{wch:45},{wch:20},{wch:14},{wch:28},{wch:12},{wch:13},{wch:13},{wch:7},{wch:13},{wch:22},{wch:20},{wch:26},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Opportunités');
+  XLSX.writeFile(wb, 'opportunites_mission_conseil.xlsx');
+  toast('Export Excel généré — '+data.length+' opportunité(s)');
+}
+document.getElementById('exportXlsxBtn').addEventListener('click', ()=> exportXlsx(filteredData()));
+document.getElementById('exportSheetsBtn').addEventListener('click', ()=> pushToSheets(filteredData().length, 'Export manuel depuis Opportunités'));
+
+
+document.querySelector('#oppSubnav a[data-preset="all"]').classList.add('active');
+renderAll();
+</script>
+</body>
+</html>
